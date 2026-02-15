@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - Nomad Bihari</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+    <link rel="icon" type="image/png" href="../assets/favicon.png">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-logo">
+                <img src="../assets/logo.png" alt="Nomad Bihari" class="logo">
+                <span>Nomad Bihari</span>
+            </div>
+            <div class="menu-toggle" id="menuToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="../index.html#home" class="nav-link">Home</a></li>
+                <li><a href="../index.html#about" class="nav-link">About Us</a></li>
+                <li><a href="../index.html#contact" class="nav-link">Contact Us</a></li>
+                <li><a href="signup.html" class="nav-link">Sign Up</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Login Type Selection Modal -->
+        <div id="loginTypeModal" class="modal">
+            <div class="modal-content">
+                <h2>Welcome Back!</h2>
+                <p style="text-align: center; margin-bottom: 30px;">How would you like to login?</p>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <button class="btn-primary" onclick="selectLoginType('user')" style="padding: 40px; font-size: 16px;">
+                        👤 Login as User
+                    </button>
+                    <button class="btn-secondary" onclick="selectLoginType('admin')" style="padding: 40px; font-size: 16px;">
+                        👨‍💼 Login as Admin
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Login Form -->
+        <div id="userLoginForm" style="display: none;">
+            <div class="form-container">
+                <h2>User Login</h2>
+                <p style="text-align: center; color: #666; margin-bottom: 20px;">Login to your Nomad Bihari account</p>
+
+                <div id="userErrorMessage" class="message error"></div>
+                <div id="userSuccessMessage" class="message success"></div>
+
+                <form id="userForm" onsubmit="handleUserLogin(event)">
+                    <div class="form-group">
+                        <label for="userUserId">User ID or Email</label>
+                        <input type="text" id="userUserId" name="userUserId" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="userPassword">Password</label>
+                        <input type="password" id="userPassword" name="userPassword" required>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <input type="checkbox" id="rememberMe">
+                        <label for="rememberMe" style="display: inline; margin: 0;">Remember me</label>
+                        <a href="#" style="float: right; color: var(--primary-color); text-decoration: none;">Forgot Password?</a>
+                    </div>
+
+                    <button type="submit" class="btn-primary" style="width: 100%;">Login</button>
+                </form>
+
+                <div class="form-link">
+                    Don't have an account? <a href="signup.html">Sign Up</a>
+                </div>
+
+                <button class="btn-secondary" onclick="backToLoginType()" style="width: 100%; margin-top: 15px;">Back</button>
+            </div>
+        </div>
+
+        <!-- Admin Login Form -->
+        <div id="adminLoginForm" style="display: none;">
+            <div class="form-container">
+                <h2>Admin Login</h2>
+                <p style="text-align: center; color: #666; margin-bottom: 20px;">Admin Access Only</p>
+
+                <div id="adminErrorMessage" class="message error"></div>
+                <div id="adminSuccessMessage" class="message success"></div>
+
+                <form id="adminForm" onsubmit="handleAdminLogin(event)">
+                    <div class="form-group">
+                        <label for="adminEmail">Admin Email</label>
+                        <input type="email" id="adminEmail" name="adminEmail" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="adminPassword">Admin Password</label>
+                        <input type="password" id="adminPassword" name="adminPassword" required>
+                    </div>
+
+                    <button type="submit" class="btn-primary" style="width: 100%;">Login as Admin</button>
+                </form>
+
+                <button class="btn-secondary" onclick="backToLoginType()" style="width: 100%; margin-top: 20px;">Back</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>About Nomad Bihari</h4>
+                    <p>A platform for travelers to share experiences and connect with the world.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="../index.html#about">About Us</a></li>
+                        <li><a href="../index.html#contact">Contact Us</a></li>
+                        <li><a href="privacy-policy.html">Privacy Policy</a></li>
+                        <li><a href="terms.html">Terms & Conditions</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Social Media</h4>
+                    <div class="social-links">
+                        <a href="https://www.facebook.com/nomadbihari" target="_blank">👍 Facebook</a>
+                        <a href="https://www.twitter.com/nomadbihari" target="_blank">🐦 Twitter</a>
+                        <a href="https://www.instagram.com/nomadbihari" target="_blank">📷 Instagram</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Nomad Bihari. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../js/main.js"></script>
+    <script src="../js/navigation.js"></script>
+    <script src="signin.js"></script>
+</body>
+</html>

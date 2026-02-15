@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nomad Bihari - Travel & Blogging Platform</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="icon" type="image/png" href="assets/favicon.png">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <!-- Logo -->
+            <div class="navbar-logo">
+                <img src="assets/logo.png" alt="Nomad Bihari" class="logo">
+                <span>Nomad Bihari</span>
+            </div>
+
+            <!-- Menu Toggle (Hamburger for mobile) -->
+            <div class="menu-toggle" id="menuToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+
+            <!-- Navigation Links -->
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="#home" class="nav-link">Home</a></li>
+                <li><a href="#about" class="nav-link">About Us</a></li>
+                <li><a href="#contact" class="nav-link">Contact Us</a></li>
+                <li><a href="pages/signup.html" class="nav-link">Sign Up</a></li>
+                <li><a href="pages/signin.html" class="nav-link">Sign In</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Privacy Policy Modal -->
+    <div id="policyModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closePolicy">&times;</span>
+            <h2>Website Agreement & Privacy Policy</h2>
+            <div class="policy-text">
+                <h3>Terms & Conditions</h3>
+                <p>By using Nomad Bihari, you agree to our terms and conditions. Please read them carefully.</p>
+                
+                <h3>Privacy Policy</h3>
+                <p>We respect your privacy. Your personal information is secure and will not be shared with third parties without your consent. We collect information to improve your experience and provide personalized content recommendations.</p>
+                
+                <h3>User Agreement</h3>
+                <p>Users agree to use this platform responsibly. Any content that violates laws or infringes on others' rights will be removed. We reserve the right to suspend or ban users who violate these terms.</p>
+                
+                <h3>Content Ownership</h3>
+                <p>By posting content, you retain ownership but grant us a license to display, share, and promote your content on the platform.</p>
+            </div>
+            <button class="btn-primary" id="acceptPolicy">Accept & Continue</button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Hero Section -->
+        <section id="home" class="hero">
+            <div class="hero-content">
+                <h1>Welcome to Nomad Bihari</h1>
+                <p>Share Your Travel Stories, Connect With Explorers</p>
+                <a href="pages/signup.html" class="btn-primary">Start Your Journey</a>
+            </div>
+            <div class="hero-image">
+                <img src="assets/hero-image.jpg" alt="Travel">
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="about">
+            <div class="container">
+                <h2>About Nomad Bihari</h2>
+                <p>Nomad Bihari is a community-driven travel and blogging platform where explorers, tourists, and travel enthusiasts share their experiences, photos, and videos from around the world. Join thousands of travelers and document your adventures with our powerful and easy-to-use platform.</p>
+                
+                <div class="features">
+                    <div class="feature-card">
+                        <h3>📸 Share Photos & Videos</h3>
+                        <p>Upload and share your travel moments with high-quality media support.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>✍️ Write Articles</h3>
+                        <p>Document your journey with detailed travel guides and personal stories.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>🌍 Connect With Travelers</h3>
+                        <p>Like, comment, and share content with thousands of travel enthusiasts.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>📊 Track Analytics</h3>
+                        <p>Monitor your content performance and engagement metrics in real-time.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="contact">
+            <div class="container">
+                <h2>Contact Us</h2>
+                <p>Have questions or feedback? We'd love to hear from you!</p>
+                
+                <form id="contactForm" class="contact-form">
+                    <div class="form-group">
+                        <input type="text" id="contactName" placeholder="Your Name" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="email" id="contactEmail" placeholder="Your Email" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="tel" id="contactPhone" placeholder="Your Phone (Optional)">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="contactSubject" placeholder="Subject" required>
+                    </div>
+                    <div class="form-group">
+                        <textarea id="contactMessage" placeholder="Your Message" rows="5" required></textarea>
+                    </div>
+                    <button type="submit" class="btn-primary">Send Message</button>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <!-- Chatbot -->
+    <div class="chatbot-widget" id="chatbotWidget">
+        <div class="chatbot-header">
+            <h3>May I Help You?</h3>
+            <button id="closeChatbot" class="close-chatbot">×</button>
+        </div>
+        <div class="chatbot-messages" id="chatbotMessages"></div>
+        <div class="chatbot-input">
+            <input type="text" id="chatbotInput" placeholder="Type your question...">
+            <button id="sendChatbot">Send</button>
+        </div>
+    </div>
+    <div class="chatbot-toggle" id="chatbotToggle">
+        <span>💬</span>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>About Nomad Bihari</h4>
+                    <p>A platform for travelers to share experiences and connect with the world.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#about">About Us</a></li>
+                        <li><a href="#contact">Contact Us</a></li>
+                        <li><a href="pages/privacy-policy.html">Privacy Policy</a></li>
+                        <li><a href="pages/terms.html">Terms & Conditions</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Social Media</h4>
+                    <div class="social-links">
+                        <a href="https://www.facebook.com/nomadbihari" target="_blank" title="Facebook">👍 Facebook</a>
+                        <a href="https://www.twitter.com/nomadbihari" target="_blank" title="Twitter">🐦 Twitter</a>
+                        <a href="https://www.instagram.com/nomadbihari" target="_blank" title="Instagram">📷 Instagram</a>
+                        <a href="https://www.youtube.com/nomadbihari" target="_blank" title="YouTube">▶️ YouTube</a>
+                        <a href="https://www.linkedin.com/company/nomadbihari" target="_blank" title="LinkedIn">💼 LinkedIn</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Nomad Bihari. All rights reserved. | <a href="pages/privacy-policy.html">Privacy Policy</a> | <a href="pages/terms.html">Terms & Conditions</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script src="js/navigation.js"></script>
+    <script src="js/chatbot.js"></script>
+</body>
+</html>

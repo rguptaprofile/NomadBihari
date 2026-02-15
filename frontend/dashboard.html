@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard - Nomad Bihari</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="icon" type="image/png" href="assets/favicon.png">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-logo">
+                <img src="assets/logo.png" alt="Nomad Bihari" class="logo">
+                <span>Nomad Bihari</span>
+            </div>
+            <div class="menu-toggle" id="menuToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html#home" class="nav-link">Home</a></li>
+                <li><a href="index.html#about" class="nav-link">About Us</a></li>
+                <li><a href="index.html#contact" class="nav-link">Contact Us</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Dashboard Container -->
+    <div class="dashboard-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="#" class="nav-link" data-page="home">🏠 Home</a></li>
+                <li><a href="#" class="nav-link" data-page="profile">👤 My Profile</a></li>
+                <li><a href="#" class="nav-link" data-page="posts">📝 My Blog/Articles</a></li>
+                <li><a href="#" class="nav-link" data-page="analytics">📊 Analytics</a></li>
+                <li><a href="#" class="nav-link" data-page="settings">⚙️ Settings</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="dashboard-content">
+            <!-- Header -->
+            <div class="dashboard-header">
+                <h1>Welcome to Your Dashboard</h1>
+                <div class="user-profile-header">
+                    <div class="profile-avatar" id="profileAvatar">U</div>
+                    <div>
+                        <p id="userName" style="margin: 0; font-weight: bold;">User</p>
+                        <button class="logout-btn" onclick="logout()">Logout</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div id="dashboardMain"></div>
+        </main>
+    </div>
+
+    <!-- Create Post Modal -->
+    <div id="createPostModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" id="closePostModal" onclick="closeCreatePostModal()">&times;</span>
+            <h2>Create New Post</h2>
+
+            <form id="createPostForm" onsubmit="handleCreatePost(event)">
+                <div class="form-group">
+                    <label for="postTitle">Post Title *</label>
+                    <input type="text" id="postTitle" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="postDescription">Description *</label>
+                    <input type="text" id="postDescription" placeholder="Catchy description" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="postContent">Content/Article *</label>
+                    <textarea id="postContent" rows="6" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="postImage">Featured Image</label>
+                    <input type="file" id="postImage" accept="image/*">
+                    <small>Max 10MB, formats: JPEG, PNG, WebP</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="postVisibility">Visibility *</label>
+                    <select id="postVisibility" required>
+                        <option value="public">Public (Everyone can see)</option>
+                        <option value="private">Private (Only me)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="seoTitle">SEO Title</label>
+                    <input type="text" id="seoTitle" placeholder="SEO optimized title (max 60 chars)">
+                </div>
+
+                <div class="form-group">
+                    <label for="seoDescription">SEO Description</label>
+                    <input type="text" id="seoDescription" placeholder="SEO optimized description (max 160 chars)">
+                </div>
+
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="submit" class="btn-primary" style="flex: 1;">Publish Post</button>
+                    <button type="button" class="btn-secondary" onclick="closeCreatePostModal()" style="flex: 1;">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div id="editProfileModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" id="closeProfileModal" onclick="closeEditProfileModal()">&times;</span>
+            <h2>Edit Profile</h2>
+
+            <form id="editProfileForm" onsubmit="handleEditProfile(event)">
+                <div class="form-group">
+                    <label for="editFirstName">First Name</label>
+                    <input type="text" id="editFirstName" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="editLastName">Last Name</label>
+                    <input type="text" id="editLastName" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="editBio">Bio</label>
+                    <textarea id="editBio" rows="3" placeholder="Tell us about yourself"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="editProfileImage">Profile Picture</label>
+                    <input type="file" id="editProfileImage" accept="image/*">
+                </div>
+
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="submit" class="btn-primary" style="flex: 1;">Save Changes</button>
+                    <button type="button" class="btn-secondary" onclick="closeEditProfileModal()" style="flex: 1;">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Chatbot Widget -->
+    <div class="chatbot-widget" id="chatbotWidget">
+        <div class="chatbot-header">
+            <h3>May I Help You?</h3>
+            <button id="closeChatbot" class="close-chatbot">×</button>
+        </div>
+        <div class="chatbot-messages" id="chatbotMessages"></div>
+        <div class="chatbot-input">
+            <input type="text" id="chatbotInput" placeholder="Type your question...">
+            <button id="sendChatbot">Send</button>
+        </div>
+    </div>
+    <div class="chatbot-toggle" id="chatbotToggle">
+        <span>💬</span>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>About Nomad Bihari</h4>
+                    <p>A platform for travelers to share experiences and connect with the world.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html#about">About Us</a></li>
+                        <li><a href="index.html#contact">Contact Us</a></li>
+                        <li><a href="pages/privacy-policy.html">Privacy Policy</a></li>
+                        <li><a href="pages/terms.html">Terms & Conditions</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Social Media</h4>
+                    <div class="social-links">
+                        <a href="https://www.facebook.com/nomadbihari" target="_blank">👍 Facebook</a>
+                        <a href="https://www.twitter.com/nomadbihari" target="_blank">🐦 Twitter</a>
+                        <a href="https://www.instagram.com/nomadbihari" target="_blank">📷 Instagram</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Nomad Bihari. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script src="js/navigation.js"></script>
+    <script src="js/chatbot.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,464 @@
+/* ===== Tablet Responsive (max-width: 768px) ===== */
+@media (max-width: 768px) {
+    /* Navigation */
+    .nav-menu {
+        display: none;
+        position: absolute;
+        top: 70px;
+        left: 0;
+        right: 0;
+        background: white;
+        flex-direction: column;
+        gap: 0;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        z-index: 999;
+    }
+
+    .nav-menu.active {
+        display: flex;
+    }
+
+    .nav-menu li {
+        border-bottom: 1px solid #ddd;
+    }
+
+    .nav-menu a {
+        display: block;
+        padding: 15px 20px;
+    }
+
+    .menu-toggle {
+        display: flex;
+    }
+
+    .menu-toggle.active span:nth-child(1) {
+        transform: rotate(45deg) translate(10px, 10px);
+    }
+
+    .menu-toggle.active span:nth-child(2) {
+        opacity: 0;
+    }
+
+    .menu-toggle.active span:nth-child(3) {
+        transform: rotate(-45deg) translate(7px, -7px);
+    }
+
+    /* Hero Section */
+    .hero {
+        flex-direction: column;
+        padding: 40px 20px;
+    }
+
+    .hero-content h1 {
+        font-size: 32px;
+    }
+
+    .hero-content p {
+        font-size: 16px;
+    }
+
+    /* About Section */
+    .about {
+        padding: 40px 20px;
+    }
+
+    .about h2 {
+        font-size: 28px;
+    }
+
+    .features {
+        grid-template-columns: 1fr;
+    }
+
+    /* Contact Section */
+    .contact {
+        padding: 40px 20px;
+    }
+
+    .contact h2 {
+        font-size: 28px;
+    }
+
+    .contact-form {
+        padding: 20px;
+    }
+
+    /* Footer */
+    .footer-content {
+        grid-template-columns: 1fr;
+    }
+
+    .footer {
+        padding: 30px 20px 10px;
+    }
+
+    /* Dashboard */
+    .dashboard-container {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        padding: 10px 0;
+        display: none;
+    }
+
+    .sidebar.active {
+        display: block;
+    }
+
+    .sidebar-menu a {
+        padding: 12px 20px;
+    }
+
+    .dashboard-content {
+        margin-left: 0;
+        padding: 15px;
+    }
+
+    .dashboard-header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+    }
+
+    .dashboard-header h1 {
+        font-size: 22px;
+    }
+
+    /* Feed */
+    .feed {
+        grid-template-columns: 1fr;
+    }
+
+    /* Modal */
+    .modal-content {
+        max-width: 90%;
+        max-height: 90vh;
+        width: 90%;
+    }
+
+    /* Form */
+    .form-container {
+        margin: 20px;
+        padding: 20px;
+        max-width: calc(100% - 40px);
+    }
+
+    /* Chatbot */
+    .chatbot-widget {
+        width: calc(100% - 20px);
+        height: 400px;
+        bottom: 70px;
+        right: 10px;
+    }
+
+    /* Hero Section Input */
+    .hero-content .btn-primary {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+/* ===== Mobile Responsive (max-width: 480px) ===== */
+@media (max-width: 480px) {
+    /* Navigation */
+    .navbar-container {
+        padding: 0 15px;
+        height: 60px;
+    }
+
+    .navbar-logo {
+        font-size: 18px;
+    }
+
+    .navbar-logo img {
+        width: 35px;
+        height: 35px;
+    }
+
+    .nav-menu {
+        top: 60px;
+    }
+
+    /* Hero Section */
+    .hero {
+        padding: 20px 15px;
+    }
+
+    .hero-content h1 {
+        font-size: 24px;
+        margin-bottom: 15px;
+    }
+
+    .hero-content p {
+        font-size: 14px;
+    }
+
+    /* About Section */
+    .about {
+        padding: 30px 15px;
+    }
+
+    .about h2 {
+        font-size: 24px;
+        margin-bottom: 15px;
+    }
+
+    .about > p {
+        font-size: 14px;
+    }
+
+    .feature-card {
+        padding: 20px;
+    }
+
+    .feature-card h3 {
+        font-size: 18px;
+    }
+
+    .feature-card p {
+        font-size: 14px;
+    }
+
+    /* Contact Section */
+    .contact {
+        padding: 30px 15px;
+    }
+
+    .contact h2 {
+        font-size: 24px;
+    }
+
+    .contact-form {
+        padding: 15px;
+        max-width: calc(100% - 30px);
+    }
+
+    /* Form */
+    .form-container {
+        margin: 15px;
+        padding: 15px;
+        max-width: calc(100% - 30px);
+        border-radius: 8px;
+    }
+
+    .form-container h2 {
+        font-size: 20px;
+        margin-bottom: 20px;
+    }
+
+    .form-group input,
+    .form-group select {
+        font-size: 16px; /* Prevents zoom on iOS */
+        padding: 10px;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions button {
+        width: 100%;
+    }
+
+    /* Dashboard */
+    .sidebar-menu a {
+        padding: 10px 15px;
+        font-size: 14px;
+    }
+
+    .dashboard-content {
+        padding: 10px;
+    }
+
+    .dashboard-header {
+        padding: 10px;
+    }
+
+    .dashboard-header h1 {
+        font-size: 18px;
+    }
+
+    /* Post Card */
+    .post-card {
+        border-radius: 8px;
+    }
+
+    .post-header {
+        padding: 10px;
+    }
+
+    .post-author-name {
+        font-size: 14px;
+    }
+
+    .post-content {
+        padding: 10px;
+    }
+
+    .post-title {
+        font-size: 16px;
+    }
+
+    .post-description {
+        font-size: 13px;
+    }
+
+    .post-actions {
+        padding: 10px;
+        gap: 10px;
+    }
+
+    /* Comments */
+    .comment {
+        margin-bottom: 10px;
+        padding-bottom: 10px;
+    }
+
+    .comment-form input {
+        font-size: 14px;
+    }
+
+    /* Modal */
+    .modal-content {
+        max-width: 95%;
+        width: 95%;
+        padding: 15px;
+    }
+
+    .modal-content h2 {
+        font-size: 20px;
+    }
+
+    .policy-text h3 {
+        font-size: 16px;
+    }
+
+    .policy-text p {
+        font-size: 14px;
+    }
+
+    /* Footer */
+    .footer {
+        padding: 20px 15px 10px;
+    }
+
+    .footer-section {
+        margin-bottom: 20px;
+    }
+
+    .footer-section h4 {
+        font-size: 16px;
+    }
+
+    .footer-section p {
+        font-size: 13px;
+    }
+
+    .footer-bottom {
+        font-size: 12px;
+    }
+
+    /* Chatbot */
+    .chatbot-toggle {
+        bottom: 15px;
+        right: 15px;
+        width: 45px;
+        height: 45px;
+        font-size: 20px;
+    }
+
+    .chatbot-widget {
+        width: calc(100% - 30px);
+        height: 350px;
+        bottom: 60px;
+        right: 15px;
+        border-radius: 8px;
+    }
+
+    .chatbot-messages {
+        padding: 10px;
+    }
+
+    .chatbot-input {
+        padding: 10px;
+        gap: 5px;
+    }
+
+    .chatbot-input input {
+        padding: 8px;
+        font-size: 13px;
+    }
+
+    .chatbot-input button {
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+
+    /* Button */
+    .btn-primary,
+    .btn-secondary {
+        width: 100%;
+        padding: 12px 0;
+        font-size: 14px;
+    }
+
+    /* Tables */
+    table {
+        font-size: 12px;
+    }
+
+    th,
+    td {
+        padding: 8px 5px;
+    }
+
+    /* Pagination */
+    .pagination {
+        gap: 5px;
+    }
+
+    .pagination a,
+    .pagination span {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+}
+
+/* ===== Extra Small Devices (max-width: 360px) ===== */
+@media (max-width: 360px) {
+    .navbar-logo {
+        font-size: 16px;
+    }
+
+    .hero-content h1 {
+        font-size: 20px;
+    }
+
+    .about h2,
+    .contact h2 {
+        font-size: 20px;
+    }
+
+    .form-container {
+        margin: 10px;
+        padding: 12px;
+        max-width: calc(100% - 20px);
+    }
+
+    .feature-card {
+        padding: 15px;
+    }
+
+    .post-actions {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .post-action {
+        font-size: 12px;
+    }
+}

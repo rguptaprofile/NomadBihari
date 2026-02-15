@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Nomad Bihari</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+    <link rel="icon" type="image/png" href="../assets/favicon.png">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-logo">
+                <img src="../assets/logo.png" alt="Nomad Bihari" class="logo">
+                <span>Nomad Bihari</span>
+            </div>
+            <div class="menu-toggle" id="menuToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="../index.html#home" class="nav-link">Home</a></li>
+                <li><a href="../index.html#about" class="nav-link">About Us</a></li>
+                <li><a href="../index.html#contact" class="nav-link">Contact Us</a></li>
+                <li><a href="signin.html" class="nav-link">Sign In</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <div class="form-container">
+            <h2>Create Your Account</h2>
+            <p style="text-align: center; color: #666; margin-bottom: 20px;">Join Nomad Bihari and start sharing your travel stories</p>
+
+            <!-- Messages -->
+            <div id="successMessage" class="message success"></div>
+            <div id="errorMessage" class="message error"></div>
+
+            <!-- Sign Up Form -->
+            <form id="signupForm">
+                <div class="form-group">
+                    <label for="firstName">First Name *</label>
+                    <input type="text" id="firstName" name="firstName" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="lastName">Last Name *</label>
+                    <input type="text" id="lastName" name="lastName" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address *</label>
+                    <input type="email" id="email" name="email" required>
+                    <small style="color: #666;">We'll send you an OTP for verification</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Mobile Number *</label>
+                    <input type="tel" id="phone" name="phone" placeholder="10 digits" required>
+                    <small style="color: #666;">10 digit Indian mobile number</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="dob">Date of Birth *</label>
+                    <input type="date" id="dob" name="dob" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="userId">User ID *</label>
+                    <input type="text" id="userId" name="userId" placeholder="Choose a unique user ID" required>
+                    <small style="color: #666;">Alphanumeric, 4-20 characters</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password *</label>
+                    <input type="password" id="password" name="password" placeholder="Min 8 chars, 1 uppercase, 1 lowercase, 1 number" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password *</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" required>
+                </div>
+
+                <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px;">Verify Email & Phone</button>
+            </form>
+
+            <div class="form-link">
+                Already have an account? <a href="signin.html">Sign In</a>
+            </div>
+        </div>
+
+        <!-- OTP Verification Modal -->
+        <div id="otpModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close" id="closeOtpModal">&times;</span>
+                <h2>Verify Your Identity</h2>
+
+                <!-- Email OTP -->
+                <div id="emailOtpSection">
+                    <h3>Email Verification</h3>
+                    <p>Enter the OTP sent to <strong id="emailDisplay"></strong></p>
+                    <div class="form-group">
+                        <input type="text" id="emailOtp" placeholder="6-digit OTP" maxlength="6">
+                    </div>
+                    <p style="color: #666; font-size: 12px;">OTP valid for 5 minutes</p>
+                    <button type="button" class="btn-primary" onclick="verifyEmailOtp()" style="width: 100%; margin-bottom: 10px;">Verify Email</button>
+                    <button type="button" class="btn-secondary" onclick="resendEmailOtp()" style="width: 100%;">Resend OTP</button>
+                </div>
+
+                <!-- Phone OTP -->
+                <div id="phoneOtpSection" style="margin-top: 30px; padding-top: 30px; border-top: 1px solid #ddd;">
+                    <h3>Phone Verification</h3>
+                    <p>Enter the OTP sent to <strong id="phoneDisplay"></strong></p>
+                    <div class="form-group">
+                        <input type="text" id="phoneOtp" placeholder="6-digit OTP" maxlength="6">
+                    </div>
+                    <p style="color: #666; font-size: 12px;">OTP valid for 5 minutes</p>
+                    <button type="button" class="btn-primary" onclick="verifyPhoneOtp()" style="width: 100%; margin-bottom: 10px;">Verify Phone</button>
+                    <button type="button" class="btn-secondary" onclick="resendPhoneOtp()" style="width: 100%;">Resend OTP</button>
+                </div>
+
+                <!-- Complete Signup -->
+                <div id="completeSection" style="margin-top: 30px; text-align: center; display: none;">
+                    <h3>✅ All Verifications Complete</h3>
+                    <p>Your identity has been verified. Complete your signup!</p>
+                    <button type="button" class="btn-primary" onclick="completeSignup()" style="width: 100%; margin-top: 20px;">Create Account</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>About Nomad Bihari</h4>
+                    <p>A platform for travelers to share experiences and connect with the world.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="../index.html#about">About Us</a></li>
+                        <li><a href="../index.html#contact">Contact Us</a></li>
+                        <li><a href="privacy-policy.html">Privacy Policy</a></li>
+                        <li><a href="terms.html">Terms & Conditions</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Social Media</h4>
+                    <div class="social-links">
+                        <a href="https://www.facebook.com/nomadbihari" target="_blank">👍 Facebook</a>
+                        <a href="https://www.twitter.com/nomadbihari" target="_blank">🐦 Twitter</a>
+                        <a href="https://www.instagram.com/nomadbihari" target="_blank">📷 Instagram</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Nomad Bihari. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../js/main.js"></script>
+    <script src="../js/navigation.js"></script>
+    <script src="signup.js"></script>
+</body>
+</html>
