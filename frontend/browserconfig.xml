@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<browserconfig>
+  <msapplication>
+    <tile>
+      <square150x150logo src="/frontend/assets/logo+icon nomadbihari.png"/>
+      <TileColor>#FF6B35</TileColor>
+    </tile>
+    <notification>
+      <polling-uri src="/frontend/notify.xml"/>
+      <polling-uri2 src="/frontend/notify2.xml"/>
+      <polling-freqhigh>45</polling-freqhigh>
+      <polling-freqmed>600</polling-freqmed>
+      <polling-freqlow>86400</polling-freqlow>
+      <cycle>1</cycle>
+    </notification>
+  </msapplication>
+</browserconfig>

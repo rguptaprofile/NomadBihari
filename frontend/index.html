@@ -6,7 +6,8 @@
     <title>Nomad Bihari - Travel & Blogging Platform</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/responsive.css">
-    <link rel="icon" type="image/png" href="assets/favicon.png">
+    <link rel="icon" type="image/png" href="/frontend/assets/logo+icon nomadbihari.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <!-- Navigation Bar -->
@@ -14,8 +15,10 @@
         <div class="navbar-container">
             <!-- Logo -->
             <div class="navbar-logo">
-                <img src="assets/logo.png" alt="Nomad Bihari" class="logo">
-                <span>Nomad Bihari</span>
+                <img src="/frontend/assets/logo+icon nomadbihari.png" alt="Nomad Bihari" class="logo">
+                <span class="logo-text">
+                    <span>N</span><span>O</span><span>M</span><span>A</span><span>D</span><span class="logo-space">&nbsp;</span><span>B</span><span>I</span><span>H</span><span>A</span><span>R</span><span>I</span>
+                </span>
             </div>
 
             <!-- Menu Toggle (Hamburger for mobile) -->
@@ -27,9 +30,9 @@
 
             <!-- Navigation Links -->
             <ul class="nav-menu" id="navMenu">
-                <li><a href="#home" class="nav-link">Home</a></li>
-                <li><a href="#about" class="nav-link">About Us</a></li>
-                <li><a href="#contact" class="nav-link">Contact Us</a></li>
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="pages/about.html" class="nav-link">About Us</a></li>
+                <li><a href="pages/contact.html" class="nav-link">Contact Us</a></li>
                 <li><a href="pages/signup.html" class="nav-link">Sign Up</a></li>
                 <li><a href="pages/signin.html" class="nav-link">Sign In</a></li>
             </ul>
@@ -61,14 +64,11 @@
     <!-- Main Content -->
     <main>
         <!-- Hero Section -->
-        <section id="home" class="hero">
+        <section id="home" class="hero" style="background-image: url(/frontend/assets/hero-image.png);">
             <div class="hero-content">
                 <h1>Welcome to Nomad Bihari</h1>
                 <p>Share Your Travel Stories, Connect With Explorers</p>
                 <a href="pages/signup.html" class="btn-primary">Start Your Journey</a>
-            </div>
-            <div class="hero-image">
-                <img src="assets/hero-image.jpg" alt="Travel">
             </div>
         </section>
 
@@ -100,7 +100,7 @@
         </section>
 
         <!-- Contact Section -->
-        <section id="contact" class="contact">
+        <!-- <section id="contact" class="contact">
             <div class="container">
                 <h2>Contact Us</h2>
                 <p>Have questions or feedback? We'd love to hear from you!</p>
@@ -124,7 +124,7 @@
                     <button type="submit" class="btn-primary">Send Message</button>
                 </form>
             </div>
-        </section>
+        </section> -->
     </main>
 
     <!-- Chatbot -->
@@ -163,11 +163,11 @@
                 <div class="footer-section">
                     <h4>Social Media</h4>
                     <div class="social-links">
-                        <a href="https://www.facebook.com/nomadbihari" target="_blank" title="Facebook">👍 Facebook</a>
-                        <a href="https://www.twitter.com/nomadbihari" target="_blank" title="Twitter">🐦 Twitter</a>
-                        <a href="https://www.instagram.com/nomadbihari" target="_blank" title="Instagram">📷 Instagram</a>
-                        <a href="https://www.youtube.com/nomadbihari" target="_blank" title="YouTube">▶️ YouTube</a>
-                        <a href="https://www.linkedin.com/company/nomadbihari" target="_blank" title="LinkedIn">💼 LinkedIn</a>
+                        <a href="https://www.facebook.com/nomadbihari" target="_blank" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="https://www.twitter.com/nomadbihari" target="_blank" title="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="https://www.instagram.com/nomadbihari" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="https://www.youtube.com/nomadbihari" target="_blank" title="YouTube"><i class="fab fa-youtube"></i></a>
+                        <a href="https://www.linkedin.com/company/nomadbihari" target="_blank" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
                     </div>
                 </div>
             </div>

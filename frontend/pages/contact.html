@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - Nomad Bihari</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+    <!-- Favicon and Icon Links -->
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/logo+icon nomadbihari.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/logo+icon nomadbihari.png">
+    <link rel="icon" type="image/png" sizes="64x64" href="../assets/logo+icon nomadbihari.png">
+    <link rel="apple-touch-icon" href="../assets/logo+icon nomadbihari.png">
+    <link rel="shortcut icon" href="../assets/logo+icon nomadbihari.png" type="image/png">
+    <meta name="theme-color" content="#FF6B35">
+    <link rel="manifest" href="../manifest.json">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <!-- Logo -->
+            <div class="navbar-logo">
+                <img src="../assets/logo+icon nomadbihari.png" alt="Nomad Bihari" class="logo">
+                <span class="logo-text">
+                    <span>N</span><span>O</span><span>M</span><span>A</span><span>D</span><span class="logo-space">&nbsp;</span><span>B</span><span>I</span><span>H</span><span>A</span><span>R</span><span>I</span>
+                </span>
+            </div>
+
+            <!-- Menu Toggle (Hamburger for mobile) -->
+            <div class="menu-toggle" id="menuToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+
+            <!-- Navigation Links -->
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="../index.html" class="nav-link">Home</a></li>
+                <li><a href="about.html" class="nav-link">About Us</a></li>
+                <li><a href="contact.html" class="nav-link">Contact Us</a></li>
+                <li><a href="signup.html" class="nav-link">Sign Up</a></li>
+                <li><a href="signin.html" class="nav-link">Sign In</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Contact Hero Section -->
+        <section class="contact-hero">
+            <div class="container">
+                <h1>Contact Us</h1>
+                <p>We'd love to hear from you. Get in touch with us today!</p>
+            </div>
+        </section>
+
+        <!-- Contact Content -->
+        <section class="contact-content">
+            <div class="container contact-grid">
+                <!-- Contact Form -->
+                <div class="contact-form-section">
+                    <h2>Send us a Message</h2>
+                    <form id="contactForm" class="contact-form">
+                        <div class="form-group">
+                            <label for="contactName">Full Name *</label>
+                            <input type="text" id="contactName" name="contactName" placeholder="Your Full Name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="contactEmail">Email Address *</label>
+                            <input type="email" id="contactEmail" name="contactEmail" placeholder="your.email@example.com" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="contactPhone">Phone Number</label>
+                            <input type="tel" id="contactPhone" name="contactPhone" placeholder="+1 (555) 123-4567">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="contactSubject">Subject *</label>
+                            <input type="text" id="contactSubject" name="contactSubject" placeholder="What is this about?" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="contactCategory">Category *</label>
+                            <select id="contactCategory" name="contactCategory" required>
+                                <option value="">Select a category</option>
+                                <option value="general">General Inquiry</option>
+                                <option value="support">Customer Support</option>
+                                <option value="partnership">Partnership/Collaboration</option>
+                                <option value="bug">Report a Bug</option>
+                                <option value="feedback">Feedback</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="contactMessage">Message *</label>
+                            <textarea id="contactMessage" name="contactMessage" placeholder="Your message here..." rows="6" required></textarea>
+                        </div>
+
+                        <div id="successMessage" class="message success" style="display: none;"></div>
+                        <div id="errorMessage" class="message error" style="display: none;"></div>
+
+                        <button type="submit" class="btn-primary">Send Message</button>
+                    </form>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="contact-info-section">
+                    <h2>Get in Touch</h2>
+                    
+                    <div class="info-card">
+                        <h3>📧 Email</h3>
+                        <p><a href="mailto:info@nomadbihari.com">info@nomadbihari.com</a></p>
+                        <p><a href="mailto:support@nomadbihari.com">support@nomadbihari.com</a></p>
+                    </div>
+
+                    <div class="info-card">
+                        <h3>📞 Phone</h3>
+                        <p><a href="tel:+91-1234-567-890">+91-1234-567-890</a></p>
+                        <p>Mon - Fri: 9:00 AM - 6:00 PM IST</p>
+                    </div>
+
+                    <div class="info-card">
+                        <h3>📍 Location</h3>
+                        <p>Nomad Bihari Headquarters<br>
+                        New Delhi, India 110001<br>
+                        <strong>Office Hours:</strong> Monday - Friday</p>
+                    </div>
+
+                    <div class="info-card">
+                        <h3>🌐 Follow Us</h3>
+                        <div class="social-links-contact">
+                            <a href="https://facebook.com/nomadbihari" target="_blank" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                            <a href="https://twitter.com/nomadbihari" target="_blank" title="Twitter"><i class="fab fa-twitter"></i></a>
+                            <a href="https://instagram.com/nomadbihari" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>
+                            <a href="https://youtube.com/nomadbihari" target="_blank" title="YouTube"><i class="fab fa-youtube"></i></a>
+                            <a href="https://linkedin.com/company/nomadbihari" target="_blank" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                        </div>
+                    </div>
+
+                    <div class="info-card faq-card">
+                        <h3>❓ FAQ</h3>
+                        <p>Check our <a href="#">Frequently Asked Questions</a> page for quick answers to common queries.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Map Section (Optional) -->
+        <section class="map-section">
+            <div class="container">
+                <h2>Visit Our Office</h2>
+                <div class="map-container">
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3502.4629865894544!2d77.20597197346222!3d28.604892575832287!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390ce37057555555%3A0x94956c562e9d540f!2sNew%20Delhi%2C%20Delhi!5e0!3m2!1sen!2sin!4v1234567890" width="100%" height="400" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>About Nomad Bihari</h4>
+                    <p>A platform for travelers to share experiences and connect with the world.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="contact.html">Contact Us</a></li>
+                        <li><a href="privacy-policy.html">Privacy Policy</a></li>
+                        <li><a href="terms.html">Terms & Conditions</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Social Media</h4>
+                    <div class="social-links">
+                        <a href="https://www.facebook.com/nomadbihari" target="_blank" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="https://www.twitter.com/nomadbihari" target="_blank" title="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="https://www.instagram.com/nomadbihari" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="https://www.youtube.com/nomadbihari" target="_blank" title="YouTube"><i class="fab fa-youtube"></i></a>
+                        <a href="https://www.linkedin.com/company/nomadbihari" target="_blank" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Nomad Bihari. All rights reserved. | <a href="privacy-policy.html">Privacy Policy</a> | <a href="terms.html">Terms & Conditions</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../js/navigation.js"></script>
+    <script>
+        // Handle contact form submission
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const name = document.getElementById('contactName').value;
+            const email = document.getElementById('contactEmail').value;
+            const subject = document.getElementById('contactSubject').value;
+            const message = document.getElementById('contactMessage').value;
+            const category = document.getElementById('contactCategory').value;
+
+            // Basic validation
+            if (!name || !email || !subject || !message || !category) {
+                document.getElementById('errorMessage').textContent = 'Please fill in all required fields.';
+                document.getElementById('errorMessage').style.display = 'block';
+                return;
+            }
+
+            // Simple email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                document.getElementById('errorMessage').textContent = 'Please enter a valid email address.';
+                document.getElementById('errorMessage').style.display = 'block';
+                return;
+            }
+
+            // Simulate form submission
+            console.log('Form Data:', {
+                name: name,
+                email: email,
+                subject: subject,
+                category: category,
+                message: message
+            });
+
+            // Show success message
+            document.getElementById('successMessage').textContent = 'Your message has been sent successfully! We will get back to you soon.';
+            document.getElementById('successMessage').style.display = 'block';
+            document.getElementById('errorMessage').style.display = 'none';
+
+            // Reset form
+            this.reset();
+
+            // Hide success message after 5 seconds
+            setTimeout(() => {
+                document.getElementById('successMessage').style.display = 'none';
+            }, 5000);
+        });
+
+        // Hide error message when user starts typing
+        document.querySelectorAll('#contactForm input, #contactForm textarea, #contactForm select').forEach(field => {
+            field.addEventListener('focus', function() {
+                document.getElementById('errorMessage').style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>

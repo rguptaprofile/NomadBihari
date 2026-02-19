@@ -4,115 +4,558 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign In - Nomad Bihari</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="64x64" href="../assets/favicon-64x64.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="../assets/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="128x128" href="../assets/favicon-128x128.png">
+    
+    <!-- Manifest -->
+    <link rel="manifest" href="../manifest.json">
+    
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#FF6B35">
+    <meta name="msapplication-TileColor" content="#FF6B35">
+    <meta name="msapplication-config" content="../browserconfig.xml">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Styles -->
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/responsive.css">
-    <link rel="icon" type="image/png" href="../assets/favicon.png">
+    <link rel="stylesheet" href="../css/auth-pages.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Login Type Tabs */
+        .login-type-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            background: #f8f9fa;
+            padding: 6px;
+            border-radius: 12px;
+        }
+
+        .login-tab {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: transparent;
+            color: #666;
+            font-size: 15px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .login-tab.active {
+            background: white;
+            color: #667eea;
+            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.2);
+        }
+
+        .login-form-wrapper {
+            display: none;
+        }
+
+        .login-form-wrapper.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .remember-forgot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .remember-forgot .modern-checkbox {
+            margin-bottom: 0;
+        }
+
+        /* Toggle Switch for Remember Me */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+            margin-right: 10px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 34px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        .toggle-switch input:checked + .toggle-slider {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(24px);
+        }
+    </style>
 </head>
 <body>
     <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="navbar-container">
+            <!-- Logo -->
             <div class="navbar-logo">
-                <img src="../assets/logo.png" alt="Nomad Bihari" class="logo">
-                <span>Nomad Bihari</span>
+                <img src="../assets/logo+icon nomadbihari.png" alt="Nomad Bihari" class="logo">
+                <span class="logo-text">
+                    <span>N</span><span>O</span><span>M</span><span>A</span><span>D</span><span class="logo-space">&nbsp;</span><span>B</span><span>I</span><span>H</span><span>A</span><span>R</span><span>I</span>
+                </span>
             </div>
+
+            <!-- Menu Toggle (Hamburger for mobile) -->
             <div class="menu-toggle" id="menuToggle">
                 <span></span>
                 <span></span>
                 <span></span>
             </div>
+
+            <!-- Navigation Links -->
             <ul class="nav-menu" id="navMenu">
-                <li><a href="../index.html#home" class="nav-link">Home</a></li>
-                <li><a href="../index.html#about" class="nav-link">About Us</a></li>
-                <li><a href="../index.html#contact" class="nav-link">Contact Us</a></li>
+                <li><a href="../index.html" class="nav-link">Home</a></li>
+                <li><a href="about.html" class="nav-link">About Us</a></li>
+                <li><a href="contact.html" class="nav-link">Contact Us</a></li>
                 <li><a href="signup.html" class="nav-link">Sign Up</a></li>
+                <li><a href="signin.html" class="nav-link">Sign In</a></li>
             </ul>
         </div>
     </nav>
 
-    <!-- Main Content -->
-    <main>
-        <!-- Login Type Selection Modal -->
-        <div id="loginTypeModal" class="modal">
-            <div class="modal-content">
-                <h2>Welcome Back!</h2>
-                <p style="text-align: center; margin-bottom: 30px;">How would you like to login?</p>
+    <!-- Auth Page Container -->
+    <div class="auth-page">
+        <div class="auth-container">
+            <!-- Left Side - Info Panel -->
+            <div class="auth-info-panel">
+                <img src="../assets/logo+icon nomadbihari.png" alt="Nomad Bihari Logo" class="auth-logo">
+                <h1>Welcome Back!</h1>
+                <p>Sign in to continue your journey through Bihar's rich heritage and explore amazing destinations.</p>
                 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                    <button class="btn-primary" onclick="selectLoginType('user')" style="padding: 40px; font-size: 16px;">
-                        👤 Login as User
+                <div class="auth-features">
+                    <div class="auth-feature">
+                        <i class="fas fa-route"></i>
+                        <span>Plan Your Trips</span>
+                    </div>
+                    <div class="auth-feature">
+                        <i class="fas fa-bookmark"></i>
+                        <span>Save Your Favorites</span>
+                    </div>
+                    <div class="auth-feature">
+                        <i class="fas fa-comments"></i>
+                        <span>Chat with AI Guide</span>
+                    </div>
+                    <div class="auth-feature">
+                        <i class="fas fa-heart"></i>
+                        <span>Share Your Stories</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side - Form Panel -->
+            <div class="auth-form-panel">
+                <div class="auth-form-header">
+                    <h2>Sign In</h2>
+                    <p>Choose your account type to continue</p>
+                </div>
+
+                <!-- Login Type Tabs -->
+                <div class="login-type-tabs">
+                    <button type="button" class="login-tab active" id="userTab">
+                        <i class="fas fa-user"></i> User Login
                     </button>
-                    <button class="btn-secondary" onclick="selectLoginType('admin')" style="padding: 40px; font-size: 16px;">
-                        👨‍💼 Login as Admin
+                    <button type="button" class="login-tab" id="adminTab">
+                        <i class="fas fa-shield-alt"></i> Admin Login
                     </button>
+                </div>
+
+                <!-- Success/Error Messages -->
+                <div id="authMessage" class="auth-message"></div>
+
+                <!-- User Login Form -->
+                <div id="userLoginForm" class="login-form-wrapper active">
+                    <form class="modern-form" id="userForm" novalidate>
+                        <!-- User ID or Email -->
+                        <div class="modern-form-group">
+                            <label for="userIdOrEmail">Username or Email *</label>
+                            <div class="modern-input-wrapper">
+                                <i class="fas fa-user modern-input-icon"></i>
+                                <input type="text" id="userIdOrEmail" name="userIdOrEmail" required placeholder="Enter username or email">
+                            </div>
+                        </div>
+
+                        <!-- Password -->
+                        <div class="modern-form-group">
+                            <label for="userPassword">Password *</label>
+                            <div class="modern-input-wrapper">
+                                <i class="fas fa-lock modern-input-icon"></i>
+                                <input type="password" id="userPassword" name="password" required placeholder="Enter your password">
+                                <i class="fas fa-eye password-toggle" id="toggleUserPassword"></i>
+                            </div>
+                        </div>
+
+                        <!-- Remember Me & Forgot Password -->
+                        <div class="remember-forgot">
+                            <div class="modern-checkbox">
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="rememberMe">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                                <label for="rememberMe">Remember me</label>
+                            </div>
+                            <div class="forgot-password">
+                                <a href="#" id="forgotPasswordLink">Forgot Password?</a>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" class="modern-btn modern-btn-primary">
+                            <i class="fas fa-sign-in-alt"></i> Sign In
+                        </button>
+
+                        <!-- Social Divider -->
+                        <div class="social-divider">
+                            <span>OR SIGN IN WITH</span>
+                        </div>
+
+                        <!-- Social Login -->
+                        <div class="social-buttons">
+                            <button type="button" class="social-btn google" title="Sign in with Google">
+                                <i class="fab fa-google"></i>
+                            </button>
+                            <button type="button" class="social-btn facebook" title="Sign in with Facebook">
+                                <i class="fab fa-facebook-f"></i>
+                            </button>
+                            <button type="button" class="social-btn twitter" title="Sign in with Twitter">
+                                <i class="fab fa-twitter"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Admin Login Form -->
+                <div id="adminLoginForm" class="login-form-wrapper">
+                    <form class="modern-form" id="adminForm" novalidate>
+                        <!-- Admin Email -->
+                        <div class="modern-form-group">
+                            <label for="adminEmail">Admin Email *</label>
+                            <div class="modern-input-wrapper">
+                                <i class="fas fa-envelope modern-input-icon"></i>
+                                <input type="email" id="adminEmail" name="adminEmail" required placeholder="admin@nomadbihari.com">
+                            </div>
+                        </div>
+
+                        <!-- Admin Password -->
+                        <div class="modern-form-group">
+                            <label for="adminPassword">Admin Password *</label>
+                            <div class="modern-input-wrapper">
+                                <i class="fas fa-shield-alt modern-input-icon"></i>
+                                <input type="password" id="adminPassword" name="password" required placeholder="Enter admin password">
+                                <i class="fas fa-eye password-toggle" id="toggleAdminPassword"></i>
+                            </div>
+                        </div>
+
+                        <!-- Admin Remember Me & 2FA Notice -->
+                        <div class="remember-forgot">
+                            <div class="modern-form-group" style="margin-bottom: 0;">
+                                <small style="color: #667eea; display: flex; align-items: center; gap: 5px;">
+                                    <i class="fas fa-info-circle"></i>
+                                    Two-factor authentication required
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" class="modern-btn modern-btn-primary" style="margin-top: 20px;">
+                            <i class="fas fa-shield-alt"></i> Admin Sign In
+                        </button>
+
+                        <!-- Security Notice -->
+                        <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border-radius: 12px; border: 2px solid #ffc107;">
+                            <small style="color: #856404; display: flex; align-items: start; gap: 10px;">
+                                <i class="fas fa-exclamation-triangle" style="margin-top: 2px;"></i>
+                                <span>Admin access is monitored and logged. Only authorized personnel should attempt to sign in.</span>
+                            </small>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Form Footer -->
+                <div class="auth-form-footer">
+                    Don't have an account? <a href="signup.html">Create Account</a>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- User Login Form -->
-        <div id="userLoginForm" style="display: none;">
-            <div class="form-container">
-                <h2>User Login</h2>
-                <p style="text-align: center; color: #666; margin-bottom: 20px;">Login to your Nomad Bihari account</p>
-
-                <div id="userErrorMessage" class="message error"></div>
-                <div id="userSuccessMessage" class="message success"></div>
-
-                <form id="userForm" onsubmit="handleUserLogin(event)">
-                    <div class="form-group">
-                        <label for="userUserId">User ID or Email</label>
-                        <input type="text" id="userUserId" name="userUserId" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="userPassword">Password</label>
-                        <input type="password" id="userPassword" name="userPassword" required>
-                    </div>
-
-                    <div style="margin-bottom: 20px;">
-                        <input type="checkbox" id="rememberMe">
-                        <label for="rememberMe" style="display: inline; margin: 0;">Remember me</label>
-                        <a href="#" style="float: right; color: var(--primary-color); text-decoration: none;">Forgot Password?</a>
-                    </div>
-
-                    <button type="submit" class="btn-primary" style="width: 100%;">Login</button>
-                </form>
-
-                <div class="form-link">
-                    Don't have an account? <a href="signup.html">Sign Up</a>
-                </div>
-
-                <button class="btn-secondary" onclick="backToLoginType()" style="width: 100%; margin-top: 15px;">Back</button>
+    <!-- 2FA Verification Modal (for Admin) -->
+    <div id="twoFAModal" class="auth-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; justify-content: center; align-items: center;">
+        <div style="background: white; border-radius: 20px; padding: 40px; max-width: 450px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+            <div style="text-align: center; margin-bottom: 30px;">
+                <i class="fas fa-shield-alt" style="font-size: 48px; color: #667eea; margin-bottom: 15px;"></i>
+                <h3 style="margin-bottom: 10px; color: #667eea; font-size: 26px;">Two-Factor Authentication</h3>
+                <p style="color: #666;">Enter the 6-digit code from your authenticator app</p>
             </div>
-        </div>
-
-        <!-- Admin Login Form -->
-        <div id="adminLoginForm" style="display: none;">
-            <div class="form-container">
-                <h2>Admin Login</h2>
-                <p style="text-align: center; color: #666; margin-bottom: 20px;">Admin Access Only</p>
-
-                <div id="adminErrorMessage" class="message error"></div>
-                <div id="adminSuccessMessage" class="message success"></div>
-
-                <form id="adminForm" onsubmit="handleAdminLogin(event)">
-                    <div class="form-group">
-                        <label for="adminEmail">Admin Email</label>
-                        <input type="email" id="adminEmail" name="adminEmail" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="adminPassword">Admin Password</label>
-                        <input type="password" id="adminPassword" name="adminPassword" required>
-                    </div>
-
-                    <button type="submit" class="btn-primary" style="width: 100%;">Login as Admin</button>
-                </form>
-
-                <button class="btn-secondary" onclick="backToLoginType()" style="width: 100%; margin-top: 20px;">Back</button>
+            
+            <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 25px;">
+                <input type="text" maxlength="1" class="twofa-digit" style="width: 55px; height: 55px; text-align: center; font-size: 24px; font-weight: 600; border: 2px solid #e0e0e0; border-radius: 12px; transition: all 0.3s;" pattern="[0-9]">
+                <input type="text" maxlength="1" class="twofa-digit" style="width: 55px; height: 55px; text-align: center; font-size: 24px; font-weight: 600; border: 2px solid #e0e0e0; border-radius: 12px; transition: all 0.3s;" pattern="[0-9]">
+                <input type="text" maxlength="1" class="twofa-digit" style="width: 55px; height: 55px; text-align: center; font-size: 24px; font-weight: 600; border: 2px solid #e0e0e0; border-radius: 12px; transition: all 0.3s;" pattern="[0-9]">
+                <input type="text" maxlength="1" class="twofa-digit" style="width: 55px; height: 55px; text-align: center; font-size: 24px; font-weight: 600; border: 2px solid #e0e0e0; border-radius: 12px; transition: all 0.3s;" pattern="[0-9]">
+                <input type="text" maxlength="1" class="twofa-digit" style="width: 55px; height: 55px; text-align: center; font-size: 24px; font-weight: 600; border: 2px solid #e0e0e0; border-radius: 12px; transition: all 0.3s;" pattern="[0-9]">
+                <input type="text" maxlength="1" class="twofa-digit" style="width: 55px; height: 55px; text-align: center; font-size: 24px; font-weight: 600; border: 2px solid #e0e0e0; border-radius: 12px; transition: all 0.3s;" pattern="[0-9]">
             </div>
+            
+            <button id="verify2FABtn" class="modern-btn modern-btn-primary" style="margin-bottom: 15px;">Verify & Sign In</button>
+            <p style="text-align: center; font-size: 14px; color: #666;">
+                <a href="#" id="cancel2FA" style="color: #667eea; text-decoration: none; font-weight: 600;">Cancel</a>
+            </p>
         </div>
-    </main>
+    </div>
+
+    <script>
+        // Tab Switching
+        const userTab = document.getElementById('userTab');
+        const adminTab = document.getElementById('adminTab');
+        const userLoginForm = document.getElementById('userLoginForm');
+        const adminLoginForm = document.getElementById('adminLoginForm');
+
+        userTab.addEventListener('click', function() {
+            userTab.classList.add('active');
+            adminTab.classList.remove('active');
+            userLoginForm.classList.add('active');
+            adminLoginForm.classList.remove('active');
+        });
+
+        adminTab.addEventListener('click', function() {
+            adminTab.classList.add('active');
+            userTab.classList.remove('active');
+            adminLoginForm.classList.add('active');
+            userLoginForm.classList.remove('active');
+        });
+
+        // Password Toggle for User
+        const toggleUserPassword = document.getElementById('toggleUserPassword');
+        const userPasswordInput = document.getElementById('userPassword');
+
+        toggleUserPassword.addEventListener('click', function() {
+            const type = userPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            userPasswordInput.setAttribute('type', type);
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+        });
+
+        // Password Toggle for Admin
+        const toggleAdminPassword = document.getElementById('toggleAdminPassword');
+        const adminPasswordInput = document.getElementById('adminPassword');
+
+        toggleAdminPassword.addEventListener('click', function() {
+            const type = adminPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            adminPasswordInput.setAttribute('type', type);
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+        });
+
+        // Message Display
+        const authMessage = document.getElementById('authMessage');
+
+        function showMessage(message, type) {
+            authMessage.textContent = message;
+            authMessage.className = `auth-message ${type}`;
+            authMessage.style.display = 'block';
+            setTimeout(() => {
+                authMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        // User Form Submission
+        const userForm = document.getElementById('userForm');
+        userForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const userIdOrEmail = document.getElementById('userIdOrEmail').value.trim();
+            const password = document.getElementById('userPassword').value;
+
+            if (!userIdOrEmail || !password) {
+                showMessage('Please fill in all fields', 'error');
+                return;
+            }
+
+            const submitBtn = userForm.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing In...';
+            submitBtn.disabled = true;
+
+            // Simulate API call
+            setTimeout(() => {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                
+                // Redirect to dashboard
+                showMessage('Login successful! Redirecting...', 'success');
+                setTimeout(() => {
+                    window.location.href = '../dashboard.html';
+                }, 1500);
+            }, 2000);
+        });
+
+        // Admin Form Submission
+        const adminForm = document.getElementById('adminForm');
+        adminForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const adminEmail = document.getElementById('adminEmail').value.trim();
+            const password = document.getElementById('adminPassword').value;
+
+            if (!adminEmail || !password) {
+                showMessage('Please fill in all fields', 'error');
+                return;
+            }
+
+            // Email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(adminEmail)) {
+                showMessage('Please enter a valid email address', 'error');
+                return;
+            }
+
+            const submitBtn = adminForm.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
+            submitBtn.disabled = true;
+
+            // Simulate API call
+            setTimeout(() => {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                
+                // Show 2FA modal
+                document.getElementById('twoFAModal').style.display = 'flex';
+            }, 1500);
+        });
+
+        // 2FA Input Auto-focus
+        const twoFAInputs = document.querySelectorAll('.twofa-digit');
+        twoFAInputs.forEach((input, index) => {
+            input.addEventListener('input', function() {
+                if (this.value.length === 1 && index < twoFAInputs.length - 1) {
+                    twoFAInputs[index + 1].focus();
+                }
+            });
+
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Backspace' && !this.value && index > 0) {
+                    twoFAInputs[index - 1].focus();
+                }
+            });
+
+            input.addEventListener('focus', function() {
+                this.style.borderColor = '#667eea';
+                this.style.boxShadow = '0 0 0 4px rgba(102, 126, 234, 0.1)';
+            });
+
+            input.addEventListener('blur', function() {
+                this.style.borderColor = '#e0e0e0';
+                this.style.boxShadow = 'none';
+            });
+        });
+
+        // Verify 2FA
+        document.getElementById('verify2FABtn').addEventListener('click', function() {
+            const code = Array.from(twoFAInputs).map(input => input.value).join('');
+            
+            if (code.length !== 6) {
+                alert('Please enter the complete 6-digit code');
+                return;
+            }
+
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
+            this.disabled = true;
+
+            setTimeout(() => {
+                alert('2FA verified! Redirecting to admin dashboard...');
+                window.location.href = '../admin-dashboard.html';
+            }, 1500);
+        });
+
+        // Cancel 2FA
+        document.getElementById('cancel2FA').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('twoFAModal').style.display = 'none';
+            twoFAInputs.forEach(input => input.value = '');
+        });
+
+        // Forgot Password
+        document.getElementById('forgotPasswordLink').addEventListener('click', function(e) {
+            e.preventDefault();
+            alert('Password reset functionality coming soon!\n\nPlease contact support at support@nomadbihari.com for assistance.');
+        });
+
+        // Social Login Buttons
+        document.querySelectorAll('.social-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const platform = this.classList[1];
+                alert(`Sign in with ${platform.charAt(0).toUpperCase() + platform.slice(1)} - Coming Soon!`);
+            });
+        });
+    </script>
 
     <!-- Footer -->
     <footer class="footer">
@@ -125,8 +568,8 @@
                 <div class="footer-section">
                     <h4>Quick Links</h4>
                     <ul>
-                        <li><a href="../index.html#about">About Us</a></li>
-                        <li><a href="../index.html#contact">Contact Us</a></li>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="contact.html">Contact Us</a></li>
                         <li><a href="privacy-policy.html">Privacy Policy</a></li>
                         <li><a href="terms.html">Terms & Conditions</a></li>
                     </ul>
@@ -134,20 +577,20 @@
                 <div class="footer-section">
                     <h4>Social Media</h4>
                     <div class="social-links">
-                        <a href="https://www.facebook.com/nomadbihari" target="_blank">👍 Facebook</a>
-                        <a href="https://www.twitter.com/nomadbihari" target="_blank">🐦 Twitter</a>
-                        <a href="https://www.instagram.com/nomadbihari" target="_blank">📷 Instagram</a>
+                        <a href="https://www.facebook.com/nomadbihari" target="_blank" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="https://www.twitter.com/nomadbihari" target="_blank" title="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="https://www.instagram.com/nomadbihari" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="https://www.youtube.com/nomadbihari" target="_blank" title="YouTube"><i class="fab fa-youtube"></i></a>
+                        <a href="https://www.linkedin.com/company/nomadbihari" target="_blank" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
                     </div>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2025 Nomad Bihari. All rights reserved.</p>
+                <p>&copy; 2025 Nomad Bihari. All rights reserved. | <a href="privacy-policy.html">Privacy Policy</a> | <a href="terms.html">Terms & Conditions</a></p>
             </div>
         </div>
     </footer>
 
-    <script src="../js/main.js"></script>
     <script src="../js/navigation.js"></script>
-    <script src="signin.js"></script>
 </body>
 </html>

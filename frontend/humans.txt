@@ -1,0 +1,44 @@
+/* TEAM */
+
+Developer/Designer: Nomad Bihari Development Team
+Twitter: @nomadbihari
+Location: New Delhi, India
+
+/* SITE */
+
+Last Updated: February 19, 2025
+Standards: HTML5, CSS3, JavaScript ES6+
+Components: Font Awesome Icons, Modern Web Standards
+Language: English
+
+/* SPECIAL THANKS */
+
+Built with ❤️ for travel enthusiasts around the world.
+
+/* TECHNOLOGY STACK */
+
+Frontend: HTML5, CSS3, JavaScript
+Icons: Font Awesome 6.4.0
+Design: Responsive Mobile-First Approach
+Browser Support: All modern browsers (Chrome, Firefox, Safari, Edge)
+
+/* FEATURES */
+
+- Professional favicon support for all devices
+- PWA (Progressive Web App) ready
+- SEO optimized with sitemap and robots.txt
+- Mobile-responsive design
+- Professional color scheme and typography
+- Smooth animations and transitions
+- Accessibility compliant
+
+/* CONTACT */
+
+Website: https://nomadbihari.com
+Email: info@nomadbihari.com
+Support: support@nomadbihari.com
+Facebook: facebook.com/nomadbihari
+Twitter: twitter.com/nomadbihari
+Instagram: instagram.com/nomadbihari
+YouTube: youtube.com/nomadbihari
+LinkedIn: linkedin.com/company/nomadbihari

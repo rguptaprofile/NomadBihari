@@ -1,0 +1,20 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /*.json$
+Disallow: /*.xml$
+Disallow: /api/
+
+Sitemap: /sitemap.xml
+
+# Crawl-delay (optional - in seconds)
+Crawl-delay: 1
+
+# Request-rate (optional)
+Request-rate: 1 per 1
+
+# Follow links
+Follow: yes
+
+# Index pages
+Index: yes

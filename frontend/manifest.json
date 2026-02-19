@@ -1,0 +1,117 @@
+{
+  "name": "Nomad Bihari - Travel & Blogging Platform",
+  "short_name": "Nomad Bihari",
+  "description": "Share your travel stories, connect with explorers and travel enthusiasts worldwide",
+  "start_url": "/frontend/index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#FF6B35",
+  "orientation": "portrait-primary",
+  "scope": "/frontend/",
+  "icons": [
+    {
+      "src": "/frontend/assets/logo+icon nomadbihari.png",
+      "sizes": "16x16",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/frontend/assets/logo+icon nomadbihari.png",
+      "sizes": "32x32",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/frontend/assets/logo+icon nomadbihari.png",
+      "sizes": "64x64",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/frontend/assets/logo+icon nomadbihari.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/frontend/assets/logo+icon nomadbihari.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/frontend/assets/logo+icon nomadbihari.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/frontend/assets/logo+icon nomadbihari.png",
+      "sizes": "256x256",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/frontend/assets/logo+icon nomadbihari.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/frontend/assets/logo+icon nomadbihari.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/frontend/assets/logo+icon nomadbihari.png",
+      "sizes": "540x720",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["travel", "lifestyle", "blogging"],
+  "shortcuts": [
+    {
+      "name": "Sign Up",
+      "short_name": "Sign Up",
+      "description": "Create your account on Nomad Bihari",
+      "url": "/frontend/pages/signup.html",
+      "icons": [
+        {
+          "src": "/frontend/assets/logo+icon nomadbihari.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Sign In",
+      "short_name": "Sign In",
+      "description": "Login to your Nomad Bihari account",
+      "url": "/frontend/pages/signin.html",
+      "icons": [
+        {
+          "src": "/frontend/assets/logo+icon nomadbihari.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "About Us",
+      "short_name": "About",
+      "description": "Learn about Nomad Bihari platform",
+      "url": "/frontend/pages/about.html",
+      "icons": [
+        {
+          "src": "/frontend/assets/logo+icon nomadbihari.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "prefer_related_applications": false
+}

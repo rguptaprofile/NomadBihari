@@ -4,134 +4,435 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up - Nomad Bihari</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="64x64" href="../assets/favicon-64x64.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="../assets/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="128x128" href="../assets/favicon-128x128.png">
+    
+    <!-- Manifest -->
+    <link rel="manifest" href="../manifest.json">
+    
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#FF6B35">
+    <meta name="msapplication-TileColor" content="#FF6B35">
+    <meta name="msapplication-config" content="../browserconfig.xml">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Styles -->
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/responsive.css">
-    <link rel="icon" type="image/png" href="../assets/favicon.png">
+    <link rel="stylesheet" href="../css/auth-pages.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .form-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .form-columns {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="navbar-container">
+            <!-- Logo -->
             <div class="navbar-logo">
-                <img src="../assets/logo.png" alt="Nomad Bihari" class="logo">
-                <span>Nomad Bihari</span>
+                <img src="../assets/logo+icon nomadbihari.png" alt="Nomad Bihari" class="logo">
+                <span class="logo-text">
+                    <span>N</span><span>O</span><span>M</span><span>A</span><span>D</span><span class="logo-space">&nbsp;</span><span>B</span><span>I</span><span>H</span><span>A</span><span>R</span><span>I</span>
+                </span>
             </div>
+
+            <!-- Menu Toggle (Hamburger for mobile) -->
             <div class="menu-toggle" id="menuToggle">
                 <span></span>
                 <span></span>
                 <span></span>
             </div>
+
+            <!-- Navigation Links -->
             <ul class="nav-menu" id="navMenu">
-                <li><a href="../index.html#home" class="nav-link">Home</a></li>
-                <li><a href="../index.html#about" class="nav-link">About Us</a></li>
-                <li><a href="../index.html#contact" class="nav-link">Contact Us</a></li>
+                <li><a href="../index.html" class="nav-link">Home</a></li>
+                <li><a href="about.html" class="nav-link">About Us</a></li>
+                <li><a href="contact.html" class="nav-link">Contact Us</a></li>
+                <li><a href="signup.html" class="nav-link">Sign Up</a></li>
                 <li><a href="signin.html" class="nav-link">Sign In</a></li>
             </ul>
         </div>
     </nav>
 
-    <!-- Main Content -->
-    <main>
-        <div class="form-container">
-            <h2>Create Your Account</h2>
-            <p style="text-align: center; color: #666; margin-bottom: 20px;">Join Nomad Bihari and start sharing your travel stories</p>
-
-            <!-- Messages -->
-            <div id="successMessage" class="message success"></div>
-            <div id="errorMessage" class="message error"></div>
-
-            <!-- Sign Up Form -->
-            <form id="signupForm">
-                <div class="form-group">
-                    <label for="firstName">First Name *</label>
-                    <input type="text" id="firstName" name="firstName" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="lastName">Last Name *</label>
-                    <input type="text" id="lastName" name="lastName" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="email">Email Address *</label>
-                    <input type="email" id="email" name="email" required>
-                    <small style="color: #666;">We'll send you an OTP for verification</small>
-                </div>
-
-                <div class="form-group">
-                    <label for="phone">Mobile Number *</label>
-                    <input type="tel" id="phone" name="phone" placeholder="10 digits" required>
-                    <small style="color: #666;">10 digit Indian mobile number</small>
-                </div>
-
-                <div class="form-group">
-                    <label for="dob">Date of Birth *</label>
-                    <input type="date" id="dob" name="dob" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="userId">User ID *</label>
-                    <input type="text" id="userId" name="userId" placeholder="Choose a unique user ID" required>
-                    <small style="color: #666;">Alphanumeric, 4-20 characters</small>
-                </div>
-
-                <div class="form-group">
-                    <label for="password">Password *</label>
-                    <input type="password" id="password" name="password" placeholder="Min 8 chars, 1 uppercase, 1 lowercase, 1 number" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="confirmPassword">Confirm Password *</label>
-                    <input type="password" id="confirmPassword" name="confirmPassword" required>
-                </div>
-
-                <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px;">Verify Email & Phone</button>
-            </form>
-
-            <div class="form-link">
-                Already have an account? <a href="signin.html">Sign In</a>
-            </div>
-        </div>
-
-        <!-- OTP Verification Modal -->
-        <div id="otpModal" class="modal" style="display: none;">
-            <div class="modal-content">
-                <span class="close" id="closeOtpModal">&times;</span>
-                <h2>Verify Your Identity</h2>
-
-                <!-- Email OTP -->
-                <div id="emailOtpSection">
-                    <h3>Email Verification</h3>
-                    <p>Enter the OTP sent to <strong id="emailDisplay"></strong></p>
-                    <div class="form-group">
-                        <input type="text" id="emailOtp" placeholder="6-digit OTP" maxlength="6">
+    <!-- Auth Page Container -->
+    <div class="auth-page">
+        <div class="auth-container">
+            <!-- Left Side - Info Panel -->
+            <div class="auth-info-panel">
+                <img src="../assets/logo+icon nomadbihari.png" alt="Nomad Bihari Logo" class="auth-logo">
+                <h1>Welcome to<br>Nomad Bihari</h1>
+                <p>Join us to explore the rich culture, heritage, and hidden gems of Bihar. Create your account and start your journey today!</p>
+                
+                <div class="auth-features">
+                    <div class="auth-feature">
+                        <i class="fas fa-map-marked-alt"></i>
+                        <span>Discover Amazing Places</span>
                     </div>
-                    <p style="color: #666; font-size: 12px;">OTP valid for 5 minutes</p>
-                    <button type="button" class="btn-primary" onclick="verifyEmailOtp()" style="width: 100%; margin-bottom: 10px;">Verify Email</button>
-                    <button type="button" class="btn-secondary" onclick="resendEmailOtp()" style="width: 100%;">Resend OTP</button>
-                </div>
-
-                <!-- Phone OTP -->
-                <div id="phoneOtpSection" style="margin-top: 30px; padding-top: 30px; border-top: 1px solid #ddd;">
-                    <h3>Phone Verification</h3>
-                    <p>Enter the OTP sent to <strong id="phoneDisplay"></strong></p>
-                    <div class="form-group">
-                        <input type="text" id="phoneOtp" placeholder="6-digit OTP" maxlength="6">
+                    <div class="auth-feature">
+                        <i class="fas fa-users"></i>
+                        <span>Connect with Travelers</span>
                     </div>
-                    <p style="color: #666; font-size: 12px;">OTP valid for 5 minutes</p>
-                    <button type="button" class="btn-primary" onclick="verifyPhoneOtp()" style="width: 100%; margin-bottom: 10px;">Verify Phone</button>
-                    <button type="button" class="btn-secondary" onclick="resendPhoneOtp()" style="width: 100%;">Resend OTP</button>
-                </div>
-
-                <!-- Complete Signup -->
-                <div id="completeSection" style="margin-top: 30px; text-align: center; display: none;">
-                    <h3>✅ All Verifications Complete</h3>
-                    <p>Your identity has been verified. Complete your signup!</p>
-                    <button type="button" class="btn-primary" onclick="completeSignup()" style="width: 100%; margin-top: 20px;">Create Account</button>
+                    <div class="auth-feature">
+                        <i class="fas fa-camera"></i>
+                        <span>Share Your Experiences</span>
+                    </div>
+                    <div class="auth-feature">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Secure & Safe Platform</span>
+                    </div>
                 </div>
             </div>
+
+            <!-- Right Side - Form Panel -->
+            <div class="auth-form-panel">
+                <div class="auth-form-header">
+                    <h2>Create Account</h2>
+                    <p>Fill in your details to get started</p>
+                </div>
+
+                <!-- Success/Error Messages -->
+                <div id="authMessage" class="auth-message"></div>
+
+                <!-- Signup Form -->
+                <form id="signupForm" class="modern-form" novalidate>
+                    <!-- Name Fields -->
+                    <div class="form-columns">
+                        <div class="modern-form-group">
+                            <label for="firstName">First Name *</label>
+                            <div class="modern-input-wrapper">
+                                <i class="fas fa-user modern-input-icon"></i>
+                                <input type="text" id="firstName" name="firstName" required placeholder="Enter first name">
+                            </div>
+                        </div>
+
+                        <div class="modern-form-group">
+                            <label for="lastName">Last Name *</label>
+                            <div class="modern-input-wrapper">
+                                <i class="fas fa-user modern-input-icon"></i>
+                                <input type="text" id="lastName" name="lastName" required placeholder="Enter last name">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="modern-form-group">
+                        <label for="email">Email Address *</label>
+                        <div class="modern-input-wrapper">
+                            <i class="fas fa-envelope modern-input-icon"></i>
+                            <input type="email" id="email" name="email" required placeholder="your@email.com">
+                        </div>
+                        <small>We'll send you a verification code</small>
+                    </div>
+
+                    <!-- Phone -->
+                    <div class="modern-form-group">
+                        <label for="phone">Phone Number *</label>
+                        <div class="modern-input-wrapper">
+                            <i class="fas fa-phone modern-input-icon"></i>
+                            <input type="tel" id="phone" name="phone" required placeholder="+91 XXXXX XXXXX" pattern="[0-9+\s-]+">
+                        </div>
+                    </div>
+
+                    <!-- Date of Birth -->
+                    <div class="modern-form-group">
+                        <label for="dob">Date of Birth *</label>
+                        <div class="modern-input-wrapper">
+                            <i class="fas fa-calendar modern-input-icon"></i>
+                            <input type="date" id="dob" name="dob" required>
+                        </div>
+                    </div>
+
+                    <!-- Username -->
+                    <div class="modern-form-group">
+                        <label for="userId">Username *</label>
+                        <div class="modern-input-wrapper">
+                            <i class="fas fa-at modern-input-icon"></i>
+                            <input type="text" id="userId" name="userId" required placeholder="Choose a unique username">
+                        </div>
+                        <small>Username must be unique and at least 4 characters</small>
+                    </div>
+
+                    <!-- Password Fields -->
+                    <div class="form-columns">
+                        <div class="modern-form-group">
+                            <label for="password">Password *</label>
+                            <div class="modern-input-wrapper">
+                                <i class="fas fa-lock modern-input-icon"></i>
+                                <input type="password" id="password" name="password" required placeholder="Create strong password">
+                                <i class="fas fa-eye password-toggle" id="togglePassword"></i>
+                            </div>
+                            <small>At least 8 characters, 1 uppercase, 1 number</small>
+                        </div>
+
+                        <div class="modern-form-group">
+                            <label for="confirmPassword">Confirm Password *</label>
+                            <div class="modern-input-wrapper">
+                                <i class="fas fa-lock modern-input-icon"></i>
+                                <input type="password" id="confirmPassword" name="confirmPassword" required placeholder="Re-enter password">
+                                <i class="fas fa-eye password-toggle" id="toggleConfirmPassword"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Terms & Conditions -->
+                    <div class="modern-checkbox">
+                        <input type="checkbox" id="terms" name="terms" required>
+                        <label for="terms">I agree to the <a href="#" style="color: #667eea; text-decoration: none;">Terms & Conditions</a> and <a href="#" style="color: #667eea; text-decoration: none;">Privacy Policy</a></label>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="modern-btn modern-btn-primary">
+                        Create Account
+                    </button>
+
+                    <!-- Social Divider -->
+                    <div class="social-divider">
+                        <span>OR SIGN UP WITH</span>
+                    </div>
+
+                    <!-- Social Signup -->
+                    <div class="social-buttons">
+                        <button type="button" class="social-btn google" title="Sign up with Google">
+                            <i class="fab fa-google"></i>
+                        </button>
+                        <button type="button" class="social-btn facebook" title="Sign up with Facebook">
+                            <i class="fab fa-facebook-f"></i>
+                        </button>
+                        <button type="button" class="social-btn twitter" title="Sign up with Twitter">
+                            <i class="fab fa-twitter"></i>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Form Footer -->
+                <div class="auth-form-footer">
+                    Already have an account? <a href="signin.html">Sign In</a>
+                </div>
+            </div>
         </div>
-    </main>
+    </div>
+
+    <!-- OTP Verification Modal (Hidden by default) -->
+    <div id="otpModal" class="auth-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; justify-content: center; align-items: center;">
+        <div style="background: white; border-radius: 20px; padding: 40px; max-width: 450px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+            <h3 style="text-align: center; margin-bottom: 10px; color: #667eea; font-size: 26px;">Verify Your Account</h3>
+            <p style="text-align: center; color: #666; margin-bottom: 30px;">Enter the 6-digit code sent to your email</p>
+            
+            <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 25px;">
+                <input type="text" maxlength="1" class="otp-digit" style="width: 55px; height: 55px; text-align: center; font-size: 24px; font-weight: 600; border: 2px solid #e0e0e0; border-radius: 12px; transition: all 0.3s;" pattern="[0-9]">
+                <input type="text" maxlength="1" class="otp-digit" style="width: 55px; height: 55px; text-align: center; font-size: 24px; font-weight: 600; border: 2px solid #e0e0e0; border-radius: 12px; transition: all 0.3s;" pattern="[0-9]">
+                <input type="text" maxlength="1" class="otp-digit" style="width: 55px; height: 55px; text-align: center; font-size: 24px; font-weight: 600; border: 2px solid #e0e0e0; border-radius: 12px; transition: all 0.3s;" pattern="[0-9]">
+                <input type="text" maxlength="1" class="otp-digit" style="width: 55px; height: 55px; text-align: center; font-size: 24px; font-weight: 600; border: 2px solid #e0e0e0; border-radius: 12px; transition: all 0.3s;" pattern="[0-9]">
+                <input type="text" maxlength="1" class="otp-digit" style="width: 55px; height: 55px; text-align: center; font-size: 24px; font-weight: 600; border: 2px solid #e0e0e0; border-radius: 12px; transition: all 0.3s;" pattern="[0-9]">
+                <input type="text" maxlength="1" class="otp-digit" style="width: 55px; height: 55px; text-align: center; font-size: 24px; font-weight: 600; border: 2px solid #e0e0e0; border-radius: 12px; transition: all 0.3s;" pattern="[0-9]">
+            </div>
+            
+            <button id="verifyOtpBtn" class="modern-btn modern-btn-primary" style="margin-bottom: 15px;">Verify Code</button>
+            <p style="text-align: center; font-size: 14px; color: #666;">
+                Didn't receive code? <a href="#" id="resendOtp" style="color: #667eea; text-decoration: none; font-weight: 600;">Resend</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Password Toggle Functionality
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('password');
+        const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+
+        togglePassword.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+        });
+
+        toggleConfirmPassword.addEventListener('click', function() {
+            const type = confirmPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            confirmPasswordInput.setAttribute('type', type);
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+        });
+
+        // Form Validation
+        const signupForm = document.getElementById('signupForm');
+        const authMessage = document.getElementById('authMessage');
+
+        function showMessage(message, type) {
+            authMessage.textContent = message;
+            authMessage.className = `auth-message ${type}`;
+            authMessage.style.display = 'block';
+            setTimeout(() => {
+                authMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        signupForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Get form values
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const dob = document.getElementById('dob').value;
+            const userId = document.getElementById('userId').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const terms = document.getElementById('terms').checked;
+
+            // Validation
+            if (!firstName || !lastName || !email || !phone || !dob || !userId || !password || !confirmPassword) {
+                showMessage('Please fill in all required fields', 'error');
+                return;
+            }
+
+            if (!terms) {
+                showMessage('Please accept the Terms & Conditions', 'error');
+                return;
+            }
+
+            // Email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showMessage('Please enter a valid email address', 'error');
+                return;
+            }
+
+            // Username validation
+            if (userId.length < 4) {
+                showMessage('Username must be at least 4 characters long', 'error');
+                return;
+            }
+
+            // Password validation
+            if (password.length < 8) {
+                showMessage('Password must be at least 8 characters long', 'error');
+                return;
+            }
+
+            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/;
+            if (!passwordRegex.test(password)) {
+                showMessage('Password must contain at least 1 uppercase letter, 1 lowercase letter, and 1 number', 'error');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showMessage('Passwords do not match', 'error');
+                return;
+            }
+
+            // Show loading state
+            const submitBtn = signupForm.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Creating Account...';
+            submitBtn.classList.add('btn-loading');
+            submitBtn.disabled = true;
+
+            // Simulate API call
+            setTimeout(() => {
+                submitBtn.textContent = originalText;
+                submitBtn.classList.remove('btn-loading');
+                submitBtn.disabled = false;
+                
+                // Show OTP modal
+                document.getElementById('otpModal').style.display = 'flex';
+                showMessage('Account created! Please verify your email', 'success');
+            }, 2000);
+        });
+
+        // OTP Input Auto-focus
+        const otpInputs = document.querySelectorAll('.otp-digit');
+        otpInputs.forEach((input, index) => {
+            input.addEventListener('input', function() {
+                if (this.value.length === 1 && index < otpInputs.length - 1) {
+                    otpInputs[index + 1].focus();
+                }
+            });
+
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Backspace' && !this.value && index > 0) {
+                    otpInputs[index - 1].focus();
+                }
+            });
+
+            input.addEventListener('focus', function() {
+                this.style.borderColor = '#667eea';
+                this.style.boxShadow = '0 0 0 4px rgba(102, 126, 234, 0.1)';
+            });
+
+            input.addEventListener('blur', function() {
+                this.style.borderColor = '#e0e0e0';
+                this.style.boxShadow = 'none';
+            });
+        });
+
+        // Verify OTP Button
+        document.getElementById('verifyOtpBtn').addEventListener('click', function() {
+            const otp = Array.from(otpInputs).map(input => input.value).join('');
+            
+            if (otp.length !== 6) {
+                alert('Please enter the complete 6-digit code');
+                return;
+            }
+
+            this.textContent = 'Verifying...';
+            this.classList.add('btn-loading');
+            this.disabled = true;
+
+            // Simulate verification
+            setTimeout(() => {
+                alert('Account verified successfully! Redirecting to dashboard...');
+                window.location.href = '../dashboard.html';
+            }, 1500);
+        });
+
+        // Resend OTP
+        document.getElementById('resendOtp').addEventListener('click', function(e) {
+            e.preventDefault();
+            alert('OTP resent to your email!');
+        });
+
+        // Social Login Buttons
+        document.querySelectorAll('.social-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const platform = this.classList[1];
+                alert(`Sign up with ${platform.charAt(0).toUpperCase() + platform.slice(1)} - Coming Soon!`);
+            });
+        });
+    </script>
 
     <!-- Footer -->
     <footer class="footer">
@@ -144,8 +445,8 @@
                 <div class="footer-section">
                     <h4>Quick Links</h4>
                     <ul>
-                        <li><a href="../index.html#about">About Us</a></li>
-                        <li><a href="../index.html#contact">Contact Us</a></li>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="contact.html">Contact Us</a></li>
                         <li><a href="privacy-policy.html">Privacy Policy</a></li>
                         <li><a href="terms.html">Terms & Conditions</a></li>
                     </ul>
@@ -153,20 +454,20 @@
                 <div class="footer-section">
                     <h4>Social Media</h4>
                     <div class="social-links">
-                        <a href="https://www.facebook.com/nomadbihari" target="_blank">👍 Facebook</a>
-                        <a href="https://www.twitter.com/nomadbihari" target="_blank">🐦 Twitter</a>
-                        <a href="https://www.instagram.com/nomadbihari" target="_blank">📷 Instagram</a>
+                        <a href="https://www.facebook.com/nomadbihari" target="_blank" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="https://www.twitter.com/nomadbihari" target="_blank" title="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="https://www.instagram.com/nomadbihari" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="https://www.youtube.com/nomadbihari" target="_blank" title="YouTube"><i class="fab fa-youtube"></i></a>
+                        <a href="https://www.linkedin.com/company/nomadbihari" target="_blank" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
                     </div>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2025 Nomad Bihari. All rights reserved.</p>
+                <p>&copy; 2025 Nomad Bihari. All rights reserved. | <a href="privacy-policy.html">Privacy Policy</a> | <a href="terms.html">Terms & Conditions</a></p>
             </div>
         </div>
     </footer>
 
-    <script src="../js/main.js"></script>
     <script src="../js/navigation.js"></script>
-    <script src="signup.js"></script>
 </body>
 </html>

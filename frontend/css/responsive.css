@@ -4,7 +4,7 @@
     .nav-menu {
         display: none;
         position: absolute;
-        top: 70px;
+        top: 75px;
         left: 0;
         right: 0;
         background: white;
@@ -45,12 +45,13 @@
 
     /* Hero Section */
     .hero {
-        flex-direction: column;
-        padding: 40px 20px;
+        min-height: 450px;
+        padding: 60px 20px;
+        background-attachment: scroll;
     }
 
     .hero-content h1 {
-        font-size: 32px;
+        font-size: 36px;
     }
 
     .hero-content p {
@@ -167,16 +168,18 @@
     /* Navigation */
     .navbar-container {
         padding: 0 15px;
-        height: 60px;
+        height: 75px;
     }
 
     .navbar-logo {
-        font-size: 18px;
+        font-size: 16px;
+        gap: 10px;
     }
 
     .navbar-logo img {
-        width: 35px;
-        height: 35px;
+        width: 65px;
+        height: 50px;
+        border-radius: 6px;
     }
 
     .nav-menu {
@@ -185,7 +188,12 @@
 
     /* Hero Section */
     .hero {
-        padding: 20px 15px;
+        min-height: 350px;
+        padding: 40px 15px;
+    }
+
+    .hero-content {
+        max-width: 90%;
     }
 
     .hero-content h1 {
@@ -195,6 +203,7 @@
 
     .hero-content p {
         font-size: 14px;
+        margin-bottom: 25px;
     }
 
     /* About Section */
@@ -460,5 +469,13 @@
 
     .post-action {
         font-size: 12px;
+    }
+
+    /* Social Media Icons */
+    .social-links a,
+    .social-links-contact a {
+        width: 45px;
+        height: 45px;
+        font-size: 16px;
     }
 }
