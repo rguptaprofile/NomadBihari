@@ -206,3 +206,15 @@ CREATE INDEX idx_shares_post_id ON shares(post_id);
 CREATE INDEX idx_analytics_user_id ON analytics(user_id);
 CREATE INDEX idx_analytics_post_id ON analytics(post_id);
 CREATE INDEX idx_notifications_user_id ON notifications(user_id);
+
+-- New user saved immediately
+INSERT INTO users (first_name, last_name, email, phone, user_id, password_hash, ...)
+VALUES ('Test', 'User', 'test@email.com', '1234567890', 'TST_ABC12_1234', '$2a$10$...', ...);
+
+-- Activity logged immediately
+INSERT INTO activity_logs (user_id, activity_type, activity_description, created_at)
+VALUES (42, 'SIGNUP', 'User TST_ABC12_1234 created account - test@email.com', NOW());
+
+-- Select the latest user
+SELECT * FROM users ORDER BY created_at DESC LIMIT 1;
+-- You'll see auto-generated user_id and hashed password

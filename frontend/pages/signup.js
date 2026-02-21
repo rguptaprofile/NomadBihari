@@ -1,8 +1,7 @@
-/* ===== Sign Up JavaScript ===== */
+/* ===== Sign Up JavaScript (Automatic Registration) ===== */
 
-let formData = {};
-let emailOtpVerified = false;
-let phoneOtpVerified = false;
+// API Base URL - Fallback if main.js not loaded
+const API_BASE_URL = window.API_BASE_URL || 'http://localhost:5000/api';
 
 document.addEventListener('DOMContentLoaded', function() {
     initializeSignupForm();
@@ -14,360 +13,293 @@ function initializeSignupForm() {
         signupForm.addEventListener('submit', handleSignupSubmit);
     }
 
-    // Close OTP modal
-    const closeOtpModal = document.getElementById('closeOtpModal');
-    if (closeOtpModal) {
-        closeOtpModal.addEventListener('click', () => {
-            document.getElementById('otpModal').style.display = 'none';
-        });
-    }
-
     // Real-time validation
-    document.getElementById('userId').addEventListener('blur', validateUserId);
-    document.getElementById('password').addEventListener('blur', validatePassword);
-    document.getElementById('phone').addEventListener('blur', validatePhone);
-    document.getElementById('email').addEventListener('blur', validateEmail);
+    const emailInput = document.getElementById('email');
+    const phoneInput = document.getElementById('phone');
+    const dobInput = document.getElementById('dob');
+    
+    if (emailInput) emailInput.addEventListener('blur', validateEmailField);
+    if (phoneInput) phoneInput.addEventListener('blur', validatePhoneField);
+    if (dobInput) dobInput.addEventListener('blur', validateDobField);
 }
 
+// Validate email format
+function validateEmailField(e) {
+    const email = e.target.value.trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    
+    if (email && !emailRegex.test(email)) {
+        showFieldError(e.target, 'कृपया एक वैध ईमेल दर्ज करें (Please enter a valid email)');
+    } else {
+        clearFieldError(e.target);
+    }
+}
+
+// Validate phone format
+function validatePhoneField(e) {
+    const phone = e.target.value.replace(/\D/g, '');
+    
+    if (phone && phone.length !== 10) {
+        showFieldError(e.target, 'कृपया 10-अंकीय फोन नंबर दर्ज करें (Please enter a 10-digit phone)');
+    } else {
+        clearFieldError(e.target);
+    }
+}
+
+// Validate age (must be 13+)
+function validateDobField(e) {
+    const dob = new Date(e.target.value);
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const monthDiff = today.getMonth() - dob.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+        age--;
+    }
+    
+    if (age < 13) {
+        showFieldError(e.target, 'आपकी आयु कम से कम 13 वर्ष होनी चाहिए (You must be at least 13 years old)');
+    } else {
+        clearFieldError(e.target);
+    }
+}
+
+function showFieldError(field, message) {
+    field.style.borderColor = '#e74c3c';
+    let error = field.parentElement.querySelector('.field-error');
+    if (!error) {
+        error = document.createElement('small');
+        error.className = 'field-error';
+        error.style.color = '#e74c3c';
+        error.style.display = 'block';
+        field.parentElement.appendChild(error);
+    }
+    error.textContent = message;
+}
+
+function clearFieldError(field) {
+    field.style.borderColor = '';
+    let error = field.parentElement.querySelector('.field-error');
+    if (error) {
+        error.remove();
+    }
+}
+
+// Main signup handler
 async function handleSignupSubmit(e) {
     e.preventDefault();
 
     // Collect form data
-    formData = {
-        firstName: document.getElementById('firstName').value.trim(),
-        lastName: document.getElementById('lastName').value.trim(),
-        email: document.getElementById('email').value.trim(),
-        phone: document.getElementById('phone').value.replace(/\D/g, ''),
-        dob: document.getElementById('dob').value,
-        userId: document.getElementById('userId').value.trim(),
-        password: document.getElementById('password').value,
-        confirmPassword: document.getElementById('confirmPassword').value
-    };
+    const firstName = document.getElementById('firstName').value.trim();
+    const lastName = document.getElementById('lastName').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const phone = document.getElementById('phone').value.replace(/\D/g, '');
+    const dob = document.getElementById('dob').value;
+    const terms = document.getElementById('terms').checked;
 
-    // Validation
-    if (!validateForm(formData)) {
+    // Validate required fields
+    if (!firstName || !lastName || !email || !phone || !dob) {
+        showAuthMessage('कृपया सभी फील्ड भरें (Please fill in all required fields)', 'error');
         return;
     }
 
-    // Show OTP modal
-    showOtpVerification();
-}
-
-function validateForm(data) {
-    const errorDiv = document.getElementById('errorMessage');
-
-    if (!data.firstName || !data.lastName) {
-        errorDiv.textContent = 'First name and last name are required';
-        errorDiv.style.display = 'block';
-        return false;
+    // Validate terms
+    if (!terms) {
+        showAuthMessage('कृपया नियम और शर्तें स्वीकार करें (Please accept Terms & Conditions)', 'error');
+        return;
     }
 
-    if (!validateEmail(null, data.email)) {
-        errorDiv.textContent = 'Please enter a valid email';
-        errorDiv.style.display = 'block';
-        return false;
-    }
-
-    if (!validatePhoneNumber(data.phone)) {
-        errorDiv.textContent = 'Please enter a valid 10-digit phone number';
-        errorDiv.style.display = 'block';
-        return false;
-    }
-
-    if (!data.dob) {
-        errorDiv.textContent = 'Date of birth is required';
-        errorDiv.style.display = 'block';
-        return false;
-    }
-
-    if (!validateUserId(null, data.userId)) {
-        errorDiv.textContent = 'User ID must be 4-20 alphanumeric characters';
-        errorDiv.style.display = 'block';
-        return false;
-    }
-
-    if (!validatePassword(null, data.password)) {
-        errorDiv.textContent = 'Password must be at least 8 characters with uppercase, lowercase, and numbers';
-        errorDiv.style.display = 'block';
-        return false;
-    }
-
-    if (data.password !== data.confirmPassword) {
-        errorDiv.textContent = 'Passwords do not match';
-        errorDiv.style.display = 'block';
-        return false;
-    }
-
-    errorDiv.style.display = 'none';
-    return true;
-}
-
-function validateEmail(e, customEmail = null) {
-    const email = customEmail || (e ? e.target.value : document.getElementById('email').value);
+    // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-}
+    if (!emailRegex.test(email)) {
+        showAuthMessage('कृपया एक वैध ईमेल दर्ज करें (Please enter a valid email)', 'error');
+        return;
+    }
 
-function validatePhone(e) {
-    const phone = e.target.value.replace(/\D/g, '');
-    e.target.value = phone;
+    // Validate phone
     if (phone.length !== 10) {
-        e.target.style.borderColor = '#f8d7da';
-    } else {
-        e.target.style.borderColor = 'green';
-    }
-}
-
-function validatePhoneNumber(phone) {
-    const cleanPhone = phone.replace(/\D/g, '');
-    return cleanPhone.length === 10;
-}
-
-function validateUserId(e, customUserId = null) {
-    const userId = customUserId || (e ? e.target.value : document.getElementById('userId').value);
-    const userIdRegex = /^[a-zA-Z0-9]{4,20}$/;
-    return userIdRegex.test(userId);
-}
-
-function validatePassword(e, customPassword = null) {
-    const password = customPassword || (e ? e.target.value : document.getElementById('password').value);
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.{8,})/;
-    return passwordRegex.test(password);
-}
-
-function showOtpVerification() {
-    // Display modal
-    const otpModal = document.getElementById('otpModal');
-    otpModal.style.display = 'flex';
-
-    // Display email and phone
-    document.getElementById('emailDisplay').textContent = formData.email;
-    document.getElementById('phoneDisplay').textContent = formData.phone;
-
-    // Request OTP from backend
-    requestEmailOtp();
-    requestPhoneOtp();
-}
-
-async function requestEmailOtp() {
-    try {
-        const response = await fetch(`${API_BASE_URL}/auth/send-email-otp`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ 
-                email: formData.email,
-                type: 'signup'
-            })
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-            console.log('OTP sent to email');
-        } else {
-            alert(data.message || 'Failed to send OTP');
-        }
-    } catch (error) {
-        console.error('Error sending email OTP:', error);
-        // For demo purposes
-        console.log('Demo: Use any 6-digit code for testing');
-    }
-}
-
-async function requestPhoneOtp() {
-    try {
-        const response = await fetch(`${API_BASE_URL}/auth/send-phone-otp`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ 
-                phone: formData.phone,
-                type: 'signup'
-            })
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-            console.log('OTP sent to phone');
-        } else {
-            alert(data.message || 'Failed to send OTP');
-        }
-    } catch (error) {
-        console.error('Error sending phone OTP:', error);
-        // For demo purposes
-        console.log('Demo: Use any 6-digit code for testing');
-    }
-}
-
-async function verifyEmailOtp() {
-    const emailOtp = document.getElementById('emailOtp').value.trim();
-
-    if (!emailOtp || emailOtp.length !== 6) {
-        alert('Please enter a valid 6-digit OTP');
+        showAuthMessage('कृपया 10-अंकीय फोन नंबर दर्ज करें (Please enter a 10-digit phone)', 'error');
         return;
     }
 
-    try {
-        const response = await fetch(`${API_BASE_URL}/auth/verify-email-otp`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                email: formData.email,
-                otp: emailOtp
-            })
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-            emailOtpVerified = true;
-            document.getElementById('emailOtpSection').style.display = 'none';
-            showNotification('Email verified successfully!');
-            checkAllOtpsVerified();
-        } else {
-            alert(data.message || 'Invalid OTP');
-        }
-    } catch (error) {
-        console.error('Error verifying email OTP:', error);
-        // For demo purposes with any 6-digit code
-        emailOtpVerified = true;
-        document.getElementById('emailOtpSection').style.display = 'none';
-        showNotification('Email verified!');
-        checkAllOtpsVerified();
+    // Validate age
+    const dob_date = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - dob_date.getFullYear();
+    const monthDiff = today.getMonth() - dob_date.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob_date.getDate())) {
+        age--;
     }
-}
-
-async function verifyPhoneOtp() {
-    const phoneOtp = document.getElementById('phoneOtp').value.trim();
-
-    if (!phoneOtp || phoneOtp.length !== 6) {
-        alert('Please enter a valid 6-digit OTP');
+    
+    if (age < 13) {
+        showAuthMessage('आपकी आयु कम से कम 13 वर्ष होनी चाहिए (You must be at least 13 years old)', 'error');
         return;
     }
 
+    // Call signup API
+    await submitSignupForm(firstName, lastName, email, phone, dob);
+}
+
+// Submit signup form to backend
+async function submitSignupForm(firstName, lastName, email, phone, dob) {
     try {
-        const response = await fetch(`${API_BASE_URL}/auth/verify-phone-otp`, {
+        const submitBtn = document.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = 'खाता बनाया जा रहा है... (Creating Account...)';
+        submitBtn.disabled = true;
+
+        const response = await fetch(`${API_BASE_URL}/auth/auto-signup`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                phone: formData.phone,
-                otp: phoneOtp
+                firstName,
+                lastName,
+                email,
+                phone,
+                dob
             })
         });
 
         const data = await response.json();
 
         if (response.ok) {
-            phoneOtpVerified = true;
-            document.getElementById('phoneOtpSection').style.display = 'none';
-            showNotification('Phone verified successfully!');
-            checkAllOtpsVerified();
+            // Account created successfully
+            console.log('✅ Signup successful:', data);
+            
+            // Save token if provided
+            if (data.token) {
+                localStorage.setItem('userToken', data.token);
+                localStorage.setItem('userId', data.userId);
+                localStorage.setItem('user_id', data.user_id);
+                localStorage.setItem('userName', `${data.firstName} ${data.lastName}`);
+                localStorage.setItem('userEmail', data.email);
+            }
+
+            showSuccessMessage(data, email);
         } else {
-            alert(data.message || 'Invalid OTP');
+            showAuthMessage(data.message || 'खाता बनाने में विफल (Failed to create account)', 'error');
         }
+
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
     } catch (error) {
-        console.error('Error verifying phone OTP:', error);
-        // For demo purposes with any 6-digit code
-        phoneOtpVerified = true;
-        document.getElementById('phoneOtpSection').style.display = 'none';
-        showNotification('Phone verified!');
-        checkAllOtpsVerified();
+        console.error('Signup error:', error);
+        showAuthMessage('त्रुटि: कृपया फिर से प्रयास करें (Error: Please try again)', 'error');
+        
+        const submitBtn = document.querySelector('button[type="submit"]');
+        submitBtn.textContent = 'खाता बनाएं (Create Account)';
+        submitBtn.disabled = false;
     }
 }
 
-function checkAllOtpsVerified() {
-    if (emailOtpVerified && phoneOtpVerified) {
-        document.getElementById('completeSection').style.display = 'block';
-    }
+// Show success message
+function showSuccessMessage(data, email) {
+    const authMessage = document.getElementById('authMessage');
+    
+    let html = `
+        <div style="background-color: #d4edda; border: 1px solid #c3e6cb; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+            <h3 style="color: #155724; margin-bottom: 15px;">🎉 स्वागत है! खाता सफलतापूर्वक बनाया गया (Account Created Successfully!)</h3>
+            
+            <p style="color: #155724; margin-bottom: 10px;">
+                <strong>${data.firstName} ${data.lastName},</strong> आपका खाता सफलतापूर्वक बनाया गया है।
+            </p>
+            
+            <div style="background-color: white; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #28a745;">
+                <p style="color: #333; margin: 5px 0;">
+                    <strong>📧 आपके यूजर आईडी और पासवर्ड:</strong><br>
+                    <code style="background-color: #f8f9fa; padding: 8px; border-radius: 3px; display: block; margin-top: 5px;">
+                        ${email} पर भेजे गए हैं
+                    </code>
+                </p>
+            </div>
+            
+            <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #ffc107;">
+                <p style="color: #856404; margin: 0;">
+                    <strong>⚠️ अगली शर्तें:</strong><br>
+                    1. अपने ईमेल की जांच करें - आपके लॉगिन विवरण वहां भेजे गए हैं<br>
+                    2. साइन इन पेज से लॉगिन करें<br>
+                    3. अपने डैशबोर्ड में जाएं
+                </p>
+            </div>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <button onclick="window.location.href='signin.html'" style="
+                    background-color: #28a745;
+                    color: white;
+                    padding: 12px 30px;
+                    border: none;
+                    border-radius: 5px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    font-size: 16px;
+                    margin-right: 10px;
+                ">
+                    🚀 अभी लॉगिन करें (Sign In Now)
+                </button>
+                
+                <button onclick="location.reload()" style="
+                    background-color: #6c757d;
+                    color: white;
+                    padding: 12px 30px;
+                    border: none;
+                    border-radius: 5px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    font-size: 16px;
+                ">
+                    नया खाता बनाएं (Create Another)
+                </button>
+            </div>
+        </div>
+    `;
+    
+    authMessage.innerHTML = html;
+    authMessage.style.display = 'block';
+    
+    // Scroll to message
+    authMessage.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    
+    // Reset form
+    document.getElementById('signupForm').reset();
+    
+    // Auto-redirect after 5 seconds
+    setTimeout(() => {
+        window.location.href = 'signin.html';
+    }, 5000);
 }
 
-async function resendEmailOtp() {
-    try {
-        const response = await fetch(`${API_BASE_URL}/auth/resend-email-otp`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ email: formData.email })
-        });
-
-        if (response.ok) {
-            showNotification('OTP resent to email');
-        } else {
-            alert('Failed to resend OTP');
-        }
-    } catch (error) {
-        console.error('Error resending email OTP:', error);
-        showNotification('OTP resent to email (demo)');
+// Show auth message
+function showAuthMessage(message, type) {
+    const authMessage = document.getElementById('authMessage');
+    
+    let bgColor = '#f8d7da';
+    let textColor = '#721c24';
+    let borderColor = '#f5c6cb';
+    let icon = '⚠️';
+    
+    if (type === 'success') {
+        bgColor = '#d4edda';
+        textColor = '#155724';
+        borderColor = '#c3e6cb';
+        icon = '✅';
     }
-}
-
-async function resendPhoneOtp() {
-    try {
-        const response = await fetch(`${API_BASE_URL}/auth/resend-phone-otp`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ phone: formData.phone })
-        });
-
-        if (response.ok) {
-            showNotification('OTP resent to phone');
-        } else {
-            alert('Failed to resend OTP');
-        }
-    } catch (error) {
-        console.error('Error resending phone OTP:', error);
-        showNotification('OTP resent to phone (demo)');
-    }
-}
-
-async function completeSignup() {
-    try {
-        const response = await fetch(`${API_BASE_URL}/auth/signup`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                firstName: formData.firstName,
-                lastName: formData.lastName,
-                email: formData.email,
-                phone: formData.phone,
-                dob: formData.dob,
-                userId: formData.userId,
-                password: formData.password,
-                emailVerified: emailOtpVerified,
-                phoneVerified: phoneOtpVerified
-            })
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-            // Save user token
-            localStorage.setItem('userToken', data.token);
-            localStorage.setItem('userId', data.userId);
-
-            // Show success and redirect
-            showNotification('Account created successfully!');
-            setTimeout(() => {
-                window.location.href = '../dashboard.html';
-            }, 2000);
-        } else {
-            alert(data.message || 'Signup failed. Please try again.');
-        }
-    } catch (error) {
-        console.error('Error completing signup:', error);
-        alert('Error creating account. Please try again.');
+    
+    authMessage.innerHTML = `
+        <div style="background-color: ${bgColor}; border: 1px solid ${borderColor}; border-radius: 8px; padding: 15px; color: ${textColor};">
+            <strong>${icon} ${message}</strong>
+        </div>
+    `;
+    authMessage.style.display = 'block';
+    
+    // Scroll to message
+    authMessage.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    
+    // Auto-hide error messages
+    if (type === 'error') {
+        setTimeout(() => {
+            authMessage.style.display = 'none';
+        }, 5000);
     }
 }

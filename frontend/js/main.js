@@ -2,6 +2,8 @@
 
 // API Base URL - Update this based on your backend server
 const API_BASE_URL = 'http://localhost:5000/api';
+// Make it globally available
+window.API_BASE_URL = API_BASE_URL;
 
 // Initialize app on page load
 document.addEventListener('DOMContentLoaded', function() {

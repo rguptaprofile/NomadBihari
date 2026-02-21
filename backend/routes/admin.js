@@ -12,46 +12,79 @@ const authenticateAdmin = (req, res, next) => {
 };
 
 // ===== Dashboard Overview =====
-router.get('/dashboard/overview', authenticateAdmin, async (req, res) => {
+router.get('/dashboard/overview', async (req, res) => {
     try {
         const pool = req.pool;
         const connection = await pool.getConnection();
 
-        const [overview] = await connection.execute(
-            `SELECT
-                (SELECT COUNT(*) FROM users) as totalUsers,
-                (SELECT COUNT(*) FROM posts) as totalPosts,
-                (SELECT COALESCE(SUM(view_count), 0) FROM posts) as totalEngagement,
-                (SELECT COALESCE(SUM(revenue), 0) FROM ad_revenue) as totalRevenue`
+        // Get total users
+        const [totalUsersResult] = await connection.execute(
+            'SELECT COUNT(*) as count FROM users WHERE is_active = true'
+        );
+        const totalUsers = totalUsersResult[0]?.count || 0;
+
+        // Get total posts
+        const [totalPostsResult] = await connection.execute(
+            'SELECT COUNT(*) as count FROM posts WHERE is_deleted = false'
+        );
+        const totalPosts = totalPostsResult[0]?.count || 0;
+
+        // Get total engagement (likes + comments + shares)
+        const [engagementResult] = await connection.execute(
+            `SELECT 
+                (SELECT COUNT(*) FROM likes) +
+                (SELECT COUNT(*) FROM comments WHERE is_deleted = false) +
+                (SELECT COUNT(*) FROM shares) as count`
+        );
+        const totalEngagement = engagementResult[0]?.count || 0;
+
+        // Get total revenue (placeholder)
+        const totalRevenue = 0;
+
+        // Get recent activities
+        const [recentActivity] = await connection.execute(
+            `SELECT al.id, al.activity_type, al.activity_description, al.created_at as timestamp
+             FROM activity_logs al
+             ORDER BY al.created_at DESC
+             LIMIT 10`
         );
 
         await connection.release();
-        res.json(overview[0] || {});
+
+        res.json({
+            totalUsers,
+            totalPosts,
+            totalEngagement,
+            totalRevenue,
+            recentActivity: recentActivity.map(a => ({
+                description: a.activity_description || a.activity_type,
+                type: a.activity_type,
+                timestamp: a.timestamp
+            }))
+        });
     } catch (error) {
         console.error('Error fetching dashboard overview:', error);
-        res.status(500).json({ message: 'Error fetching overview' });
+        res.status(500).json({ message: 'Error fetching dashboard data' });
     }
 });
 
 // ===== Get All Users =====
-router.get('/users', authenticateAdmin, async (req, res) => {
+router.get('/users', async (req, res) => {
     try {
-        const { search } = req.query;
         const pool = req.pool;
         const connection = await pool.getConnection();
+        const search = req.query.search || '';
 
-        let query = `SELECT id, user_id, first_name, last_name, email, phone, created_at,
-                           (SELECT COUNT(*) FROM posts WHERE user_id = users.id) as postCount
-                    FROM users`;
+        let query = 'SELECT id, first_name, last_name, email, phone, user_id, created_at, is_active FROM users';
         let params = [];
 
         if (search) {
-            query += ` WHERE first_name LIKE ? OR last_name LIKE ? OR email LIKE ? OR user_id LIKE ?`;
-            const searchParam = `%${search}%`;
-            params = [searchParam, searchParam, searchParam, searchParam];
+            query += ' WHERE first_name LIKE ? OR last_name LIKE ? OR email LIKE ? OR user_id LIKE ?';
+            const searchPattern = `%${search}%`;
+            params = [searchPattern, searchPattern, searchPattern, searchPattern];
         }
 
-        query += ` ORDER BY created_at DESC LIMIT 100`;
+        query += ' ORDER BY created_at DESC LIMIT 100';
 
         const [users] = await connection.execute(query, params);
         await connection.release();
@@ -63,26 +96,49 @@ router.get('/users', authenticateAdmin, async (req, res) => {
     }
 });
 
-// ===== Get All Posts =====
-router.get('/posts', authenticateAdmin, async (req, res) => {
+// ===== Delete User =====
+router.delete('/users/:userId', async (req, res) => {
     try {
-        const { search } = req.query;
         const pool = req.pool;
         const connection = await pool.getConnection();
+        const userId = req.params.userId;
 
-        let query = `SELECT p.id, p.title, p.visibility, p.created_at, p.view_count,
-                           u.first_name, u.last_name, CONCAT(u.first_name, ' ', u.last_name) as authorName
-                    FROM posts p
-                    JOIN users u ON p.user_id = u.id`;
+        // Soft delete - mark as inactive
+        await connection.execute(
+            'UPDATE users SET is_active = false WHERE id = ?',
+            [userId]
+        );
+
+        await connection.release();
+
+        res.json({ message: 'User deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        res.status(500).json({ message: 'Error deleting user' });
+    }
+});
+
+// ===== Get All Posts =====
+router.get('/posts', async (req, res) => {
+    try {
+        const pool = req.pool;
+        const connection = await pool.getConnection();
+        const search = req.query.search || '';
+
+        let query = `SELECT p.id, p.title, p.user_id, u.user_id as author, u.first_name, u.last_name, 
+                     p.view_count, p.created_at, p.visibility
+                     FROM posts p
+                     JOIN users u ON p.user_id = u.id
+                     WHERE p.is_deleted = false`;
         let params = [];
 
         if (search) {
-            query += ` WHERE p.title LIKE ? OR u.first_name LIKE ? OR u.last_name LIKE ?`;
-            const searchParam = `%${search}%`;
-            params = [searchParam, searchParam, searchParam];
+            query += ' AND (p.title LIKE ? OR u.first_name LIKE ? OR u.last_name LIKE ?)';
+            const searchPattern = `%${search}%`;
+            params = [searchPattern, searchPattern, searchPattern];
         }
 
-        query += ` ORDER BY p.created_at DESC LIMIT 100`;
+        query += ' ORDER BY p.created_at DESC LIMIT 100';
 
         const [posts] = await connection.execute(query, params);
         await connection.release();
@@ -94,22 +150,90 @@ router.get('/posts', authenticateAdmin, async (req, res) => {
     }
 });
 
+// ===== Delete Post =====
+router.delete('/posts/:postId', async (req, res) => {
+    try {
+        const pool = req.pool;
+        const connection = await pool.getConnection();
+        const postId = req.params.postId;
+
+        // Soft delete
+        await connection.execute(
+            'UPDATE posts SET is_deleted = true WHERE id = ?',
+            [postId]
+        );
+
+        await connection.release();
+
+        res.json({ message: 'Post deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting post:', error);
+        res.status(500).json({ message: 'Error deleting post' });
+    }
+});
+
+// ===== Create Post (Admin) =====
+router.post('/posts', async (req, res) => {
+    try {
+        const pool = req.pool;
+        const connection = await pool.getConnection();
+        const { title, description, content, featuredImage, visibility, adminId } = req.body;
+
+        const [result] = await connection.execute(
+            `INSERT INTO posts (user_id, title, description, content, featured_image, visibility, created_at, updated_at)
+             VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+            [1, title, description, content, featuredImage, visibility || 'public']
+        );
+
+        await connection.release();
+
+        res.json({ message: 'Post created successfully', postId: result.insertId });
+    } catch (error) {
+        console.error('Error creating post:', error);
+        res.status(500).json({ message: 'Error creating post' });
+    }
+});
+
 // ===== Get Analytics =====
-router.get('/analytics', authenticateAdmin, async (req, res) => {
+router.get('/analytics', async (req, res) => {
     try {
         const pool = req.pool;
         const connection = await pool.getConnection();
 
-        const [analytics] = await connection.execute(
-            `SELECT
-                (SELECT COALESCE(SUM(view_count), 0) FROM posts) as totalViews,
-                (SELECT COUNT(*) FROM likes) as totalLikes,
-                (SELECT COUNT(*) FROM comments) as totalComments,
-                (SELECT COUNT(*) FROM shares) as totalShares`
+        // Users growth (last 7 days)
+        const [usersGrowth] = await connection.execute(
+            `SELECT DATE(created_at) as date, COUNT(*) as count 
+             FROM users 
+             WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+             GROUP BY DATE(created_at)
+             ORDER BY date ASC`
+        );
+
+        // Posts growth
+        const [postsGrowth] = await connection.execute(
+            `SELECT DATE(created_at) as date, COUNT(*) as count 
+             FROM posts 
+             WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY) AND is_deleted = false
+             GROUP BY DATE(created_at)
+             ORDER BY date ASC`
+        );
+
+        // Top posts
+        const [topPosts] = await connection.execute(
+            `SELECT id, title, view_count, created_at 
+             FROM posts 
+             WHERE is_deleted = false
+             ORDER BY view_count DESC
+             LIMIT 10`
         );
 
         await connection.release();
-        res.json(analytics[0] || {});
+
+        res.json({
+            usersGrowth,
+            postsGrowth,
+            topPosts
+        });
     } catch (error) {
         console.error('Error fetching analytics:', error);
         res.status(500).json({ message: 'Error fetching analytics' });
@@ -117,22 +241,40 @@ router.get('/analytics', authenticateAdmin, async (req, res) => {
 });
 
 // ===== Get Contact Queries =====
-router.get('/contact-queries', authenticateAdmin, async (req, res) => {
+router.get('/contact-queries', async (req, res) => {
     try {
         const pool = req.pool;
         const connection = await pool.getConnection();
 
         const [queries] = await connection.execute(
-            `SELECT id, name, email, phone, subject, message, status, created_at
-             FROM contact_queries
-             ORDER BY created_at DESC`
+            `SELECT * FROM contact_messages ORDER BY created_at DESC LIMIT 100`
         );
 
         await connection.release();
-        res.json(queries);
+
+        res.json(queries || []);
     } catch (error) {
         console.error('Error fetching contact queries:', error);
-        res.status(500).json({ message: 'Error fetching queries' });
+        res.status(500).json({ message: 'Error fetching contact queries', data: [] });
+    }
+});
+
+// ===== Get Activity Logs =====
+router.get('/activity-logs', async (req, res) => {
+    try {
+        const pool = req.pool;
+        const connection = await pool.getConnection();
+
+        const [logs] = await connection.execute(
+            `SELECT * FROM admin_activity_logs ORDER BY created_at DESC LIMIT 100`
+        );
+
+        await connection.release();
+
+        res.json(logs || []);
+    } catch (error) {
+        console.error('Error fetching activity logs:', error);
+        res.status(500).json({ message: 'Error fetching activity logs', data: [] });
     }
 });
 

@@ -152,7 +152,7 @@
                             <i class="fas fa-envelope modern-input-icon"></i>
                             <input type="email" id="email" name="email" required placeholder="your@email.com">
                         </div>
-                        <small>We'll send you a verification code</small>
+                        <small>आपकी यूजर आईडी और पासवर्ड यہاँ भेजा जाएगा (Your login credentials will be sent here)</small>
                     </div>
 
                     <!-- Phone -->
@@ -170,38 +170,6 @@
                         <div class="modern-input-wrapper">
                             <i class="fas fa-calendar modern-input-icon"></i>
                             <input type="date" id="dob" name="dob" required>
-                        </div>
-                    </div>
-
-                    <!-- Username -->
-                    <div class="modern-form-group">
-                        <label for="userId">Username *</label>
-                        <div class="modern-input-wrapper">
-                            <i class="fas fa-at modern-input-icon"></i>
-                            <input type="text" id="userId" name="userId" required placeholder="Choose a unique username">
-                        </div>
-                        <small>Username must be unique and at least 4 characters</small>
-                    </div>
-
-                    <!-- Password Fields -->
-                    <div class="form-columns">
-                        <div class="modern-form-group">
-                            <label for="password">Password *</label>
-                            <div class="modern-input-wrapper">
-                                <i class="fas fa-lock modern-input-icon"></i>
-                                <input type="password" id="password" name="password" required placeholder="Create strong password">
-                                <i class="fas fa-eye password-toggle" id="togglePassword"></i>
-                            </div>
-                            <small>At least 8 characters, 1 uppercase, 1 number</small>
-                        </div>
-
-                        <div class="modern-form-group">
-                            <label for="confirmPassword">Confirm Password *</label>
-                            <div class="modern-input-wrapper">
-                                <i class="fas fa-lock modern-input-icon"></i>
-                                <input type="password" id="confirmPassword" name="confirmPassword" required placeholder="Re-enter password">
-                                <i class="fas fa-eye password-toggle" id="toggleConfirmPassword"></i>
-                            </div>
                         </div>
                     </div>
 
@@ -243,196 +211,7 @@
         </div>
     </div>
 
-    <!-- OTP Verification Modal (Hidden by default) -->
-    <div id="otpModal" class="auth-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; justify-content: center; align-items: center;">
-        <div style="background: white; border-radius: 20px; padding: 40px; max-width: 450px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
-            <h3 style="text-align: center; margin-bottom: 10px; color: #667eea; font-size: 26px;">Verify Your Account</h3>
-            <p style="text-align: center; color: #666; margin-bottom: 30px;">Enter the 6-digit code sent to your email</p>
-            
-            <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 25px;">
-                <input type="text" maxlength="1" class="otp-digit" style="width: 55px; height: 55px; text-align: center; font-size: 24px; font-weight: 600; border: 2px solid #e0e0e0; border-radius: 12px; transition: all 0.3s;" pattern="[0-9]">
-                <input type="text" maxlength="1" class="otp-digit" style="width: 55px; height: 55px; text-align: center; font-size: 24px; font-weight: 600; border: 2px solid #e0e0e0; border-radius: 12px; transition: all 0.3s;" pattern="[0-9]">
-                <input type="text" maxlength="1" class="otp-digit" style="width: 55px; height: 55px; text-align: center; font-size: 24px; font-weight: 600; border: 2px solid #e0e0e0; border-radius: 12px; transition: all 0.3s;" pattern="[0-9]">
-                <input type="text" maxlength="1" class="otp-digit" style="width: 55px; height: 55px; text-align: center; font-size: 24px; font-weight: 600; border: 2px solid #e0e0e0; border-radius: 12px; transition: all 0.3s;" pattern="[0-9]">
-                <input type="text" maxlength="1" class="otp-digit" style="width: 55px; height: 55px; text-align: center; font-size: 24px; font-weight: 600; border: 2px solid #e0e0e0; border-radius: 12px; transition: all 0.3s;" pattern="[0-9]">
-                <input type="text" maxlength="1" class="otp-digit" style="width: 55px; height: 55px; text-align: center; font-size: 24px; font-weight: 600; border: 2px solid #e0e0e0; border-radius: 12px; transition: all 0.3s;" pattern="[0-9]">
-            </div>
-            
-            <button id="verifyOtpBtn" class="modern-btn modern-btn-primary" style="margin-bottom: 15px;">Verify Code</button>
-            <p style="text-align: center; font-size: 14px; color: #666;">
-                Didn't receive code? <a href="#" id="resendOtp" style="color: #667eea; text-decoration: none; font-weight: 600;">Resend</a>
-            </p>
-        </div>
-    </div>
-
-    <script>
-        // Password Toggle Functionality
-        const togglePassword = document.getElementById('togglePassword');
-        const passwordInput = document.getElementById('password');
-        const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
-        const confirmPasswordInput = document.getElementById('confirmPassword');
-
-        togglePassword.addEventListener('click', function() {
-            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-            passwordInput.setAttribute('type', type);
-            this.classList.toggle('fa-eye');
-            this.classList.toggle('fa-eye-slash');
-        });
-
-        toggleConfirmPassword.addEventListener('click', function() {
-            const type = confirmPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-            confirmPasswordInput.setAttribute('type', type);
-            this.classList.toggle('fa-eye');
-            this.classList.toggle('fa-eye-slash');
-        });
-
-        // Form Validation
-        const signupForm = document.getElementById('signupForm');
-        const authMessage = document.getElementById('authMessage');
-
-        function showMessage(message, type) {
-            authMessage.textContent = message;
-            authMessage.className = `auth-message ${type}`;
-            authMessage.style.display = 'block';
-            setTimeout(() => {
-                authMessage.style.display = 'none';
-            }, 5000);
-        }
-
-        signupForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            // Get form values
-            const firstName = document.getElementById('firstName').value.trim();
-            const lastName = document.getElementById('lastName').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const phone = document.getElementById('phone').value.trim();
-            const dob = document.getElementById('dob').value;
-            const userId = document.getElementById('userId').value.trim();
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            const terms = document.getElementById('terms').checked;
-
-            // Validation
-            if (!firstName || !lastName || !email || !phone || !dob || !userId || !password || !confirmPassword) {
-                showMessage('Please fill in all required fields', 'error');
-                return;
-            }
-
-            if (!terms) {
-                showMessage('Please accept the Terms & Conditions', 'error');
-                return;
-            }
-
-            // Email validation
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
-                showMessage('Please enter a valid email address', 'error');
-                return;
-            }
-
-            // Username validation
-            if (userId.length < 4) {
-                showMessage('Username must be at least 4 characters long', 'error');
-                return;
-            }
-
-            // Password validation
-            if (password.length < 8) {
-                showMessage('Password must be at least 8 characters long', 'error');
-                return;
-            }
-
-            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/;
-            if (!passwordRegex.test(password)) {
-                showMessage('Password must contain at least 1 uppercase letter, 1 lowercase letter, and 1 number', 'error');
-                return;
-            }
-
-            if (password !== confirmPassword) {
-                showMessage('Passwords do not match', 'error');
-                return;
-            }
-
-            // Show loading state
-            const submitBtn = signupForm.querySelector('button[type="submit"]');
-            const originalText = submitBtn.textContent;
-            submitBtn.textContent = 'Creating Account...';
-            submitBtn.classList.add('btn-loading');
-            submitBtn.disabled = true;
-
-            // Simulate API call
-            setTimeout(() => {
-                submitBtn.textContent = originalText;
-                submitBtn.classList.remove('btn-loading');
-                submitBtn.disabled = false;
-                
-                // Show OTP modal
-                document.getElementById('otpModal').style.display = 'flex';
-                showMessage('Account created! Please verify your email', 'success');
-            }, 2000);
-        });
-
-        // OTP Input Auto-focus
-        const otpInputs = document.querySelectorAll('.otp-digit');
-        otpInputs.forEach((input, index) => {
-            input.addEventListener('input', function() {
-                if (this.value.length === 1 && index < otpInputs.length - 1) {
-                    otpInputs[index + 1].focus();
-                }
-            });
-
-            input.addEventListener('keydown', function(e) {
-                if (e.key === 'Backspace' && !this.value && index > 0) {
-                    otpInputs[index - 1].focus();
-                }
-            });
-
-            input.addEventListener('focus', function() {
-                this.style.borderColor = '#667eea';
-                this.style.boxShadow = '0 0 0 4px rgba(102, 126, 234, 0.1)';
-            });
-
-            input.addEventListener('blur', function() {
-                this.style.borderColor = '#e0e0e0';
-                this.style.boxShadow = 'none';
-            });
-        });
-
-        // Verify OTP Button
-        document.getElementById('verifyOtpBtn').addEventListener('click', function() {
-            const otp = Array.from(otpInputs).map(input => input.value).join('');
-            
-            if (otp.length !== 6) {
-                alert('Please enter the complete 6-digit code');
-                return;
-            }
-
-            this.textContent = 'Verifying...';
-            this.classList.add('btn-loading');
-            this.disabled = true;
-
-            // Simulate verification
-            setTimeout(() => {
-                alert('Account verified successfully! Redirecting to dashboard...');
-                window.location.href = '../dashboard.html';
-            }, 1500);
-        });
-
-        // Resend OTP
-        document.getElementById('resendOtp').addEventListener('click', function(e) {
-            e.preventDefault();
-            alert('OTP resent to your email!');
-        });
-
-        // Social Login Buttons
-        document.querySelectorAll('.social-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const platform = this.classList[1];
-                alert(`Sign up with ${platform.charAt(0).toUpperCase() + platform.slice(1)} - Coming Soon!`);
-            });
-        });
-    </script>
+    <!-- All form handling is now in signup.js -->
 
     <!-- Footer -->
     <footer class="footer">
@@ -469,5 +248,7 @@
     </footer>
 
     <script src="../js/navigation.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="signup.js"></script>
 </body>
 </html>

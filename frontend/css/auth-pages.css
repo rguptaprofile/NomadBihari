@@ -157,19 +157,20 @@
     flex: 1;
     background: white;
     border-radius: 0 30px 30px 0;
-    padding: 60px 70px;
+    padding: 40px 50px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     box-shadow: 10px 0 40px rgba(0, 0, 0, 0.1);
     position: relative;
     overflow-y: auto;
     max-height: 100vh;
+    padding-top: 50px;
 }
 
 .auth-form-header {
     text-align: center;
-    margin-bottom: 40px;
+    margin-bottom: 25px;
 }
 
 .auth-form-header h2 {
@@ -195,7 +196,7 @@
 
 .modern-form-group {
     position: relative;
-    margin-bottom: 25px;
+    margin-bottom: 18px;
 }
 
 .modern-form-group label {
@@ -225,7 +226,7 @@
 .modern-form-group textarea,
 .modern-form-group select {
     width: 100%;
-    padding: 14px 18px 14px 50px;
+    padding: 12px 18px 12px 50px;
     border: 2px solid #e0e0e0;
     border-radius: 12px;
     font-size: 15px;
@@ -294,7 +295,7 @@
 /* Modern Buttons */
 .modern-btn {
     width: 100%;
-    padding: 16px;
+    padding: 13px;
     border: none;
     border-radius: 12px;
     font-size: 16px;
@@ -351,7 +352,7 @@
 .social-divider {
     text-align: center;
     position: relative;
-    margin: 30px 0;
+    margin: 18px 0;
 }
 
 .social-divider::before {
@@ -414,7 +415,7 @@
 /* Form Footer */
 .auth-form-footer {
     text-align: center;
-    margin-top: 30px;
+    margin-top: 20px;
     font-size: 14px;
     color: #666;
 }
@@ -434,7 +435,7 @@
 /* Forgot Password Link */
 .forgot-password {
     text-align: right;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
 .forgot-password a {

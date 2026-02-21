@@ -3,11 +3,31 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Check if user is logged in
     const userToken = localStorage.getItem('userToken');
+    const urlParams = new URLSearchParams(window.location.search);
+    const authParam = urlParams.get('auth');
+    
     if (!userToken) {
-        window.location.href = 'pages/signin.html';
+        // Don't redirect if we just came from login (auth=user parameter)
+        if (authParam !== 'user') {
+            window.location.href = 'pages/signin.html';
+            return;
+        }
+        // If auth=user but no token yet, wait a moment for localStorage to update
+        setTimeout(function() {
+            const token = localStorage.getItem('userToken');
+            if (token) {
+                initializeDashboard();
+            } else {
+                window.location.href = 'pages/signin.html';
+            }
+        }, 300);
         return;
     }
 
+    // Clear URL param and initialize
+    if (authParam) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
     initializeDashboard();
 });
 

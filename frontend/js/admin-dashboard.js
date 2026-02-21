@@ -2,11 +2,31 @@
 
 document.addEventListener('DOMContentLoaded', function() {
     const adminToken = localStorage.getItem('adminToken');
+    const urlParams = new URLSearchParams(window.location.search);
+    const authParam = urlParams.get('auth');
+    
     if (!adminToken) {
-        window.location.href = 'pages/signin.html';
+        // Don't redirect if we just came from login (auth=admin parameter)
+        if (authParam !== 'admin') {
+            window.location.href = 'pages/signin.html';
+            return;
+        }
+        // If auth=admin but no token yet, wait a moment for localStorage to update
+        setTimeout(function() {
+            const token = localStorage.getItem('adminToken');
+            if (token) {
+                initializeAdminDashboard();
+            } else {
+                window.location.href = 'pages/signin.html';
+            }
+        }, 300);
         return;
     }
 
+    // Clear URL param and initialize
+    if (authParam) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
     initializeAdminDashboard();
 });
 

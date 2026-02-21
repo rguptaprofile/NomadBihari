@@ -1,49 +1,77 @@
 /* ===== Sign In JavaScript ===== */
 
+// API Base URL - Fallback if main.js not loaded
+const API_BASE_URL = window.API_BASE_URL || 'http://localhost:5000/api';
+
 document.addEventListener('DOMContentLoaded', function() {
-    // Show login type selection on page load
-    document.getElementById('loginTypeModal').style.display = 'flex';
+    // Initialize tab switching
+    initializeTabSwitching();
+    
+    // Initialize form submissions
+    initializeFormSubmissions();
+    
+    // Show user login form by default
+    document.getElementById('userLoginForm').classList.add('active');
 });
 
-function selectLoginType(type) {
-    document.getElementById('loginTypeModal').style.display = 'none';
+function initializeTabSwitching() {
+    const userTab = document.getElementById('userTab');
+    const adminTab = document.getElementById('adminTab');
+    const userLoginForm = document.getElementById('userLoginForm');
+    const adminLoginForm = document.getElementById('adminLoginForm');
 
-    if (type === 'user') {
-        document.getElementById('userLoginForm').style.display = 'block';
-        document.getElementById('userUserId').focus();
-    } else if (type === 'admin') {
-        document.getElementById('adminLoginForm').style.display = 'block';
-        document.getElementById('adminEmail').focus();
+    if (userTab) {
+        userTab.addEventListener('click', function(e) {
+            e.preventDefault();
+            userTab.classList.add('active');
+            adminTab.classList.remove('active');
+            userLoginForm.classList.add('active');
+            adminLoginForm.classList.remove('active');
+        });
+    }
+
+    if (adminTab) {
+        adminTab.addEventListener('click', function(e) {
+            e.preventDefault();
+            adminTab.classList.add('active');
+            userTab.classList.remove('active');
+            adminLoginForm.classList.add('active');
+            userLoginForm.classList.remove('active');
+        });
     }
 }
 
-function backToLoginType() {
-    document.getElementById('loginTypeModal').style.display = 'flex';
-    document.getElementById('userLoginForm').style.display = 'none';
-    document.getElementById('adminLoginForm').style.display = 'none';
+function initializeFormSubmissions() {
+    const userForm = document.getElementById('userForm');
+    const adminForm = document.getElementById('adminForm');
+
+    if (userForm) {
+        userForm.addEventListener('submit', handleUserLogin);
+    }
+
+    if (adminForm) {
+        adminForm.addEventListener('submit', handleAdminLogin);
+    }
 }
 
 // User Login Handler
 async function handleUserLogin(e) {
     e.preventDefault();
 
-    const userId = document.getElementById('userUserId').value.trim();
+    const userId = document.getElementById('userIdOrEmail').value.trim();
     const password = document.getElementById('userPassword').value;
     const rememberMe = document.getElementById('rememberMe').checked;
 
-    const errorDiv = document.getElementById('userErrorMessage');
-    const successDiv = document.getElementById('userSuccessMessage');
+    const errorDiv = document.getElementById('authMessage');
 
     if (!userId || !password) {
-        errorDiv.textContent = 'Please enter both User ID/Email and Password';
-        errorDiv.style.display = 'block';
-        successDiv.style.display = 'none';
+        showAuthMessage('Please enter both Username/Email and Password', 'error');
         return;
     }
 
     try {
         // Show loading
-        const submitBtn = event.target.querySelector('button[type="submit"]');
+        const submitBtn = e.target.querySelector('button[type="submit"]');
         const originalText = submitBtn.textContent;
         submitBtn.textContent = 'Logging in...';
         submitBtn.disabled = true;
@@ -67,18 +95,16 @@ async function handleUserLogin(e) {
             localStorage.setItem('userToken', data.token);
             localStorage.setItem('userId', data.userId);
             localStorage.setItem('userName', data.firstName + ' ' + data.lastName);
+            localStorage.setItem('userEmail', data.email);
+            localStorage.removeItem('adminToken');
 
-            successDiv.textContent = 'Login successful! Redirecting...';
-            successDiv.style.display = 'block';
-            errorDiv.style.display = 'none';
+            showAuthMessage('Login successful! Redirecting...', 'success');
 
             setTimeout(() => {
-                window.location.href = '../dashboard.html';
-            }, 2000);
+                window.location.href = '../dashboard.html?auth=user';
+            }, 1000);
         } else {
-            errorDiv.textContent = data.message || 'Invalid User ID/Email or Password';
-            errorDiv.style.display = 'block';
-            successDiv.style.display = 'none';
+            showAuthMessage(data.message || 'Invalid Username/Email or Password', 'error');
         }
 
         submitBtn.textContent = originalText;
@@ -86,18 +112,22 @@ async function handleUserLogin(e) {
     } catch (error) {
         console.error('Login error:', error);
         
-        // For demo purposes - accept any non-empty credentials
-        localStorage.setItem('userToken', 'demo_token_' + Math.random().toString(36).substring(7));
-        localStorage.setItem('userId', userId);
-        localStorage.setItem('userName', 'Demo User');
+        // For demo purposes - check for demo credentials
+        if (userId === 'demo' && password === 'demo123') {
+            localStorage.setItem('userToken', 'demo_token_' + Math.random().toString(36).substring(7));
+            localStorage.setItem('userId', userId);
+            localStorage.setItem('userName', 'Demo User');
+            localStorage.setItem('userEmail', 'demo@nomadbihari.com');
+            localStorage.removeItem('adminToken');
 
-        successDiv.textContent = 'Login successful (Demo Mode)! Redirecting...';
-        successDiv.style.display = 'block';
-        errorDiv.style.display = 'none';
+            showAuthMessage('Demo login successful! Redirecting...', 'success');
 
-        setTimeout(() => {
-            window.location.href = '../dashboard.html';
-        }, 2000);
+            setTimeout(() => {
+                window.location.href = '../dashboard.html?auth=user';
+            }, 1000);
+        } else {
+            showAuthMessage('Error logging in. Please try again.', 'error');
+        }
     }
 }
 
@@ -108,19 +138,14 @@ async function handleAdminLogin(e) {
     const email = document.getElementById('adminEmail').value.trim();
     const password = document.getElementById('adminPassword').value;
 
-    const errorDiv = document.getElementById('adminErrorMessage');
-    const successDiv = document.getElementById('adminSuccessMessage');
-
     if (!email || !password) {
-        errorDiv.textContent = 'Please enter both Email and Password';
-        errorDiv.style.display = 'block';
-        successDiv.style.display = 'none';
+        showAuthMessage('Please enter both Email and Password', 'error');
         return;
     }
 
     try {
         // Show loading
-        const submitBtn = event.target.querySelector('button[type="submit"]');
+        const submitBtn = e.target.querySelector('button[type="submit"]');
         const originalText = submitBtn.textContent;
         submitBtn.textContent = 'Logging in...';
         submitBtn.disabled = true;
@@ -145,17 +170,13 @@ async function handleAdminLogin(e) {
             localStorage.setItem('adminName', data.adminName);
             localStorage.removeItem('userToken');
 
-            successDiv.textContent = 'Admin login successful! Redirecting...';
-            successDiv.style.display = 'block';
-            errorDiv.style.display = 'none';
+            showAuthMessage('Admin login successful! Redirecting...', 'success');
 
             setTimeout(() => {
-                window.location.href = '../admin-dashboard.html';
-            }, 2000);
+                window.location.href = '../admin-dashboard.html?auth=admin';
+            }, 1000);
         } else {
-            errorDiv.textContent = data.message || 'Invalid Admin Email or Password';
-            errorDiv.style.display = 'block';
-            successDiv.style.display = 'none';
+            showAuthMessage(data.message || 'Invalid Admin Email or Password', 'error');
         }
 
         submitBtn.textContent = originalText;
@@ -164,41 +185,59 @@ async function handleAdminLogin(e) {
         console.error('Admin login error:', error);
         
         // For demo purposes - check for specific admin credentials
-        const DEMO_ADMIN_EMAIL = 'admin@nomadbihari.com';
-        const DEMO_ADMIN_PASSWORD = 'Admin@123';
+        const ADMIN_CREDENTIALS = [
+            { email: 'gupta.rahul.hru@gmail.com', password: 'Admin1-9525.com', name: 'Rahul Gupta' },
+            { email: 'kumarravi69600@gmail.com', password: 'Chudail@143', name: 'Ravi Kumar' }
+        ];
 
-        if (email === DEMO_ADMIN_EMAIL && password === DEMO_ADMIN_PASSWORD) {
-            localStorage.setItem('adminToken', 'demo_admin_token_' + Math.random().toString(36).substring(7));
+        const adminFound = ADMIN_CREDENTIALS.find(a => a.email === email && a.password === password);
+        
+        if (adminFound) {
+            localStorage.setItem('adminToken', 'admin_token_' + Math.random().toString(36).substring(7));
             localStorage.setItem('adminId', '1');
-            localStorage.setItem('adminName', 'Nomad Bihari Admin');
+            localStorage.setItem('adminName', adminFound.name);
             localStorage.removeItem('userToken');
 
-            successDiv.textContent = 'Admin login successful (Demo)! Redirecting...';
-            successDiv.style.display = 'block';
-            errorDiv.style.display = 'none';
+            showAuthMessage('Admin login successful! Redirecting...', 'success');
 
             setTimeout(() => {
-                window.location.href = '../admin-dashboard.html';
-            }, 2000);
+                window.location.href = '../admin-dashboard.html?auth=admin';
+            }, 1000);
         } else {
-            errorDiv.textContent = 'Invalid Admin Email or Password. (Demo: admin@nomadbihari.com / Admin@123)';
-            errorDiv.style.display = 'block';
-            successDiv.style.display = 'none';
+            showAuthMessage('Invalid Admin Email or Password', 'error');
         }
     }
 }
 
-// Form submission with Enter key
-document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('userForm')?.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            handleUserLogin(e);
-        }
-    });
+function showAuthMessage(message, type) {
+    const authMessage = document.getElementById('authMessage');
+    authMessage.textContent = message;
+    authMessage.className = `auth-message ${type}`;
+    authMessage.style.display = 'block';
+    setTimeout(() => {
+        authMessage.style.display = 'none';
+    }, 5000);
+}
 
-    document.getElementById('adminForm')?.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            handleAdminLogin(e);
-        }
+// Password Toggle Functionality
+const toggleUserPassword = document.getElementById('toggleUserPassword');
+if (toggleUserPassword) {
+    toggleUserPassword.addEventListener('click', function() {
+        const passwordInput = document.getElementById('userPassword');
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        this.classList.toggle('fa-eye');
+        this.classList.toggle('fa-eye-slash');
     });
-});
+}
+
+const toggleAdminPassword = document.getElementById('toggleAdminPassword');
+if (toggleAdminPassword) {
+    toggleAdminPassword.addEventListener('click', function() {
+        const passwordInput = document.getElementById('adminPassword');
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        this.classList.toggle('fa-eye');
+        this.classList.toggle('fa-eye-slash');
+    });
+}

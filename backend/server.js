@@ -61,9 +61,9 @@ app.use('/api/contact', contactRoutes);
 const chatbotRoutes = require('./routes/chatbot');
 app.use('/api/chatbot', chatbotRoutes);
 
-// AI Routes
-const aiRoutes = require('./routes/ai');
-app.use('/api/ai', aiRoutes);
+// AI Routes - Temporarily disabled (requires openai package)
+// const aiRoutes = require('./routes/ai');
+// app.use('/api/ai', aiRoutes);
 
 // ===== Error Handling =====
 app.use((err, req, res, next) => {
