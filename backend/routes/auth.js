@@ -1,10 +1,14 @@
-/* ===== Authentication Routes ===== */
+/* ===== Authentication Routes with MongoDB ===== */
 
 const express = require('express');
 const router = express.Router();
 const bcryptjs = require('bcryptjs');
 const jwt = require('jwt-simple');
 const nodemailer = require('nodemailer');
+const axios = require('axios');
+const twilio = require('twilio');
+const User = require('../models/User');
+const ActivityLog = require('../models/ActivityLog');
 
 // ===== Configuration =====
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
@@ -12,7 +16,7 @@ const JWT_EXPIRY = 7 * 24 * 60 * 60; // 7 days
 
 // Email Configuration
 const emailTransporter = nodemailer.createTransport({
-    service: 'gmail', // Use your email service
+    service: 'gmail',
     auth: {
         user: process.env.EMAIL_USER || 'your-email@gmail.com',
         pass: process.env.EMAIL_PASS || 'your-password'
@@ -22,30 +26,175 @@ const emailTransporter = nodemailer.createTransport({
 // OTP Storage (In production, use Redis or database)
 const otpStorage = {};
 
+const EMAIL_USER = process.env.EMAIL_USER;
+const EMAIL_PASS = process.env.EMAIL_PASS;
+const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
+const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN;
+const TWILIO_PHONE_NUMBER = process.env.TWILIO_PHONE_NUMBER;
+
+const LINKEDIN_CLIENT_ID = process.env.LINKEDIN_CLIENT_ID;
+const LINKEDIN_CLIENT_SECRET = process.env.LINKEDIN_CLIENT_SECRET;
+const LINKEDIN_REDIRECT_URI = process.env.LINKEDIN_REDIRECT_URI;
+
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+const GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI;
+
+const FACEBOOK_CLIENT_ID = process.env.FACEBOOK_CLIENT_ID;
+const FACEBOOK_CLIENT_SECRET = process.env.FACEBOOK_CLIENT_SECRET;
+const FACEBOOK_REDIRECT_URI = process.env.FACEBOOK_REDIRECT_URI;
+
+const isPlaceholder = (value) => !value || value.includes('YOUR_');
+const isEmailConfigured = () => !isPlaceholder(EMAIL_USER) && !isPlaceholder(EMAIL_PASS);
+const isTwilioConfigured = () => !isPlaceholder(TWILIO_ACCOUNT_SID) && !isPlaceholder(TWILIO_AUTH_TOKEN) && !isPlaceholder(TWILIO_PHONE_NUMBER);
+const isLinkedInConfigured = () => !isPlaceholder(LINKEDIN_CLIENT_ID) && !isPlaceholder(LINKEDIN_CLIENT_SECRET) && !isPlaceholder(LINKEDIN_REDIRECT_URI);
+const isGoogleConfigured = () => !isPlaceholder(GOOGLE_CLIENT_ID) && !isPlaceholder(GOOGLE_CLIENT_SECRET) && !isPlaceholder(GOOGLE_REDIRECT_URI);
+const isFacebookConfigured = () => !isPlaceholder(FACEBOOK_CLIENT_ID) && !isPlaceholder(FACEBOOK_CLIENT_SECRET) && !isPlaceholder(FACEBOOK_REDIRECT_URI);
+
+const twilioClient = isTwilioConfigured() ? twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN) : null;
+
+// ===== Helper Functions =====
+
+// Generate Unique User ID
+async function generateUniqueUserId(firstName) {
+    const prefix = firstName.substring(0, 3).toUpperCase();
+    const randomStr = Math.random().toString(36).substring(2, 7).toUpperCase();
+    const randomNum = Math.floor(1000 + Math.random() * 9000);
+    const userId = `${prefix}_${randomStr}_${randomNum}`;
+    
+    // Check if userId already exists
+    const existingUser = await User.findOne({ userId });
+    if (existingUser) {
+        // Try again if duplicate
+        return generateUniqueUserId(firstName);
+    }
+    
+    return userId;
+}
+
+// Generate Random Password
+function generateRandomPassword() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%';
+    let password = '';
+    for (let i = 0; i < 12; i++) {
+        password += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return password;
+}
+
+// Send Credentials Email
+async function sendCredentialsEmail(email, firstName, userId, password) {
+    try {
+        if (!isEmailConfigured()) {
+            console.warn('Email is not configured. Skipping credentials email.');
+            return false;
+        }
+        const mailOptions = {
+            from: process.env.EMAIL_USER,
+            to: email,
+            subject: 'Nomad Bihari - आपके खाते की जानकारी (Your Account Details)',
+            html: `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <style>
+                        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+                        .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }
+                        .credentials { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #667eea; }
+                        .button { display: inline-block; background: #667eea; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+                        .warning { background: #fff3cd; padding: 15px; border-radius: 5px; border-left: 4px solid #ffc107; margin: 20px 0; }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <div class="header">
+                            <h1>🎉 स्वागत है Nomad Bihari में!</h1>
+                            <p>Welcome to Nomad Bihari!</p>
+                        </div>
+                        <div class="content">
+                            <h2>नमस्ते ${firstName}!</h2>
+                            <p>आपका खाता सफलतापूर्वक बनाया गया है। नीचे आपकी लॉगिन जानकारी दी गई है:</p>
+                            
+                            <div class="credentials">
+                                <h3>📧 लॉगिन विवरण (Login Details):</h3>
+                                <p><strong>User ID:</strong> <code style="background: #f8f9fa; padding: 5px 10px; border-radius: 3px;">${userId}</code></p>
+                                <p><strong>Email:</strong> <code style="background: #f8f9fa; padding: 5px 10px; border-radius: 3px;">${email}</code></p>
+                                <p><strong>Password:</strong> <code style="background: #f8f9fa; padding: 5px 10px; border-radius: 3px;">${password}</code></p>
+                            </div>
+                            
+                            <div class="warning">
+                                <strong>⚠️ महत्वपूर्ण सुरक्षा सूचना (Important Security Notice):</strong><br>
+                                1. लॉगिन करने के बाद अपना पासवर्ड तुरंत बदलें<br>
+                                2. अपना पासवर्ड किसी के साथ साझा न करें<br>
+                                3. इस ईमेल को सुरक्षित रखें या डिलीट कर दें
+                            </div>
+                            
+                            <div style="text-align: center; margin: 30px 0;">
+                                <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/pages/signin.html" class="button">
+                                    🚀 अभी लॉगिन करें (Login Now)
+                                </a>
+                            </div>
+                            
+                            <p style="color: #666; font-size: 14px; margin-top: 30px;">
+                                यदि आपने यह खाता नहीं बनाया है, तो कृपया इस ईमेल को अनदेखा करें।<br>
+                                If you didn't create this account, please ignore this email.
+                            </p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `
+        };
+
+        await emailTransporter.sendMail(mailOptions);
+        return true;
+    } catch (error) {
+        console.error('Email sending error:', error);
+        return false;
+    }
+}
+
+function isOtpVerified(target) {
+    const storedOtp = otpStorage[target];
+    if (!storedOtp) {
+        return { ok: false, message: 'OTP not found' };
+    }
+    if (storedOtp.expiresAt < Date.now()) {
+        return { ok: false, message: 'OTP expired' };
+    }
+    if (!storedOtp.verified) {
+        return { ok: false, message: 'OTP not verified' };
+    }
+    return { ok: true };
+}
+
 // ===== Send Email OTP =====
 router.post('/send-email-otp', async (req, res) => {
     try {
         const { email } = req.body;
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-        // Store OTP with 5-minute expiry
         otpStorage[email] = {
             otp,
             type: 'email',
+            verified: false,
             expiresAt: Date.now() + 5 * 60 * 1000
         };
 
-        // For demo: Log OTP to console (since email service not configured)
+        if (isEmailConfigured()) {
+            await emailTransporter.sendMail({
+                from: EMAIL_USER,
+                to: email,
+                subject: 'Nomad Bihari - Email OTP',
+                html: `<p>Your OTP is: <strong>${otp}</strong></p><p>This OTP is valid for 5 minutes.</p>`
+            });
+            return res.json({ message: 'OTP sent to email' });
+        }
+
         console.log(`\n📧 OTP for ${email}: ${otp}\n`);
-
-        // In production, use email service
-        // await emailTransporter.sendMail({...});
-
-        res.json({ 
-            message: 'OTP sent to email',
-            // Development only - remove in production
-            demo_otp: otp
-        });
+        res.json({ message: 'OTP sent to email (demo)', demo_otp: otp });
     } catch (error) {
         console.error('Error sending email OTP:', error);
         res.status(500).json({ message: 'Error sending OTP' });
@@ -57,26 +206,27 @@ router.post('/send-phone-otp', async (req, res) => {
     try {
         const { phone } = req.body;
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const phoneDigits = String(phone || '').replace(/\D/g, '');
+        const smsTarget = String(phone || '').startsWith('+') ? phone : `+91${phoneDigits}`;
 
-        // Store OTP with 5-minute expiry
-        otpStorage[phone] = {
+        otpStorage[phoneDigits] = {
             otp,
             type: 'phone',
+            verified: false,
             expiresAt: Date.now() + 5 * 60 * 1000
         };
 
-        // For demo: Log OTP to console (since SMS service not configured)
-        console.log(`\n📱 OTP for ${phone}: ${otp}\n`);
+        if (twilioClient) {
+            await twilioClient.messages.create({
+                body: `Your Nomad Bihari OTP is ${otp}. Valid for 5 minutes.`,
+                from: TWILIO_PHONE_NUMBER,
+                to: smsTarget
+            });
+            return res.json({ message: 'OTP sent to phone' });
+        }
 
-        // In production, use Twilio or similar SMS service
-        // For now, just log it
-        console.log(`SMS OTP for ${phone}: ${otp}`);
-
-        res.json({ 
-            message: 'OTP sent to phone',
-            // Development only - remove in production
-            demo_otp: otp
-        });
+        console.log(`\n📱 OTP for ${smsTarget}: ${otp}\n`);
+        res.json({ message: 'OTP sent to phone (demo)', demo_otp: otp });
     } catch (error) {
         console.error('Error sending phone OTP:', error);
         res.status(500).json({ message: 'Error sending OTP' });
@@ -97,8 +247,7 @@ router.post('/verify-email-otp', async (req, res) => {
             return res.status(400).json({ message: 'OTP expired' });
         }
 
-        // Mark as verified
-        storedOtp.emailVerified = true;
+        storedOtp.verified = true;
         res.json({ message: 'Email verified successfully' });
     } catch (error) {
         console.error('Error verifying email OTP:', error);
@@ -110,8 +259,8 @@ router.post('/verify-email-otp', async (req, res) => {
 router.post('/verify-phone-otp', async (req, res) => {
     try {
         const { phone, otp } = req.body;
-
-        const storedOtp = otpStorage[phone];
+        const phoneDigits = String(phone || '').replace(/\D/g, '');
+        const storedOtp = otpStorage[phoneDigits];
         if (!storedOtp || storedOtp.otp !== otp) {
             return res.status(400).json({ message: 'Invalid OTP' });
         }
@@ -120,8 +269,7 @@ router.post('/verify-phone-otp', async (req, res) => {
             return res.status(400).json({ message: 'OTP expired' });
         }
 
-        // Mark as verified
-        storedOtp.phoneVerified = true;
+        storedOtp.verified = true;
         res.json({ message: 'Phone verified successfully' });
     } catch (error) {
         console.error('Error verifying phone OTP:', error);
@@ -129,110 +277,56 @@ router.post('/verify-phone-otp', async (req, res) => {
     }
 });
 
-// ===== Resend Email OTP =====
-router.post('/resend-email-otp', async (req, res) => {
-    try {
-        const { email } = req.body;
-        
-        // Resend the same OTP or generate new one
-        const otp = otpStorage[email]?.otp || Math.floor(100000 + Math.random() * 900000).toString();
-
-        otpStorage[email] = {
-            otp,
-            type: 'email',
-            expiresAt: Date.now() + 5 * 60 * 1000
-        };
-
-        await emailTransporter.sendMail({
-            from: process.env.EMAIL_USER,
-            to: email,
-            subject: 'Nomad Bihari - Email Verification OTP (Resent)',
-            html: `
-                <h2>Email Verification</h2>
-                <p>Your OTP is: <strong>${otp}</strong></p>
-                <p>This OTP is valid for 5 minutes only.</p>
-            `
-        });
-
-        res.json({ message: 'OTP resent to email' });
-    } catch (error) {
-        console.error('Error resending email OTP:', error);
-        res.status(500).json({ message: 'Error resending OTP' });
-    }
-});
-
-// ===== Resend Phone OTP =====
-router.post('/resend-phone-otp', async (req, res) => {
-    try {
-        const { phone } = req.body;
-
-        const otp = otpStorage[phone]?.otp || Math.floor(100000 + Math.random() * 900000).toString();
-
-        otpStorage[phone] = {
-            otp,
-            type: 'phone',
-            expiresAt: Date.now() + 5 * 60 * 1000
-        };
-
-        console.log(`SMS OTP for ${phone}: ${otp}`);
-        res.json({ message: 'OTP resent to phone' });
-    } catch (error) {
-        console.error('Error resending phone OTP:', error);
-        res.status(500).json({ message: 'Error resending OTP' });
-    }
-});
-
 // ===== User Sign Up =====
 router.post('/signup', async (req, res) => {
     try {
         const { firstName, lastName, email, phone, dob, userId, password, emailVerified, phoneVerified } = req.body;
-        const pool = req.pool;
-        const connection = await pool.getConnection();
 
         // Validation
         if (!firstName || !lastName || !email || !phone || !dob || !userId || !password) {
-            await connection.release();
             return res.status(400).json({ message: 'All fields are required' });
         }
 
         // Check if user already exists
-        const [existingUser] = await connection.execute(
-            'SELECT * FROM users WHERE email = ? OR user_id = ? OR phone = ?',
-            [email, userId, phone]
-        );
+        const existingUser = await User.findOne({
+            $or: [{ email }, { userId }, { phone }]
+        });
 
-        if (existingUser.length > 0) {
-            await connection.release();
+        if (existingUser) {
             return res.status(400).json({ message: 'User already exists with this email, username, or phone' });
         }
 
         // Hash password
         const hashedPassword = await bcryptjs.hash(password, 10);
 
-        // Insert user
-        const [result] = await connection.execute(
-            `INSERT INTO users (first_name, last_name, email, phone, user_id, password_hash, dob, email_verified, phone_verified)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [firstName, lastName, email, phone, userId, hashedPassword, dob, emailVerified || false, phoneVerified || false]
-        );
+        // Create user
+        const newUser = new User({
+            firstName,
+            lastName,
+            email,
+            phone,
+            userId,
+            passwordHash: hashedPassword,
+            dob: new Date(dob),
+            emailVerified: emailVerified || false,
+            phoneVerified: phoneVerified || false
+        });
 
-        const newUserId = result.insertId;
+        await newUser.save();
 
         // Log signup activity
-        await connection.execute(
-            `INSERT INTO activity_logs 
-             (user_id, activity_type, activity_description, created_at)
-             VALUES (?, ?, ?, NOW())`,
-            [newUserId, 'SIGNUP', `User ${userId} created account - ${email}`]
-        );
-
-        await connection.release();
+        const activityLog = new ActivityLog({
+            userId: newUser._id,
+            activityType: 'SIGNUP',
+            activityDescription: `User ${userId} created account - ${email}`
+        });
+        await activityLog.save();
 
         // Generate JWT token
         const token = jwt.encode({
-            userId: newUserId,
+            userId: newUser._id.toString(),
             email: email,
-            userId: userId,
+            user_id: userId,
             exp: Math.floor(Date.now() / 1000) + JWT_EXPIRY
         }, JWT_SECRET);
 
@@ -254,60 +348,51 @@ router.post('/signup', async (req, res) => {
 router.post('/user-login', async (req, res) => {
     try {
         const { userIdOrEmail, password } = req.body;
-        const pool = req.pool;
-        const connection = await pool.getConnection();
 
         // Find user by ID or email
-        const [users] = await connection.execute(
-            'SELECT * FROM users WHERE user_id = ? OR email = ?',
-            [userIdOrEmail, userIdOrEmail]
-        );
+        const user = await User.findOne({
+            $or: [{ userId: userIdOrEmail }, { email: userIdOrEmail }]
+        });
 
-        if (users.length === 0) {
-            await connection.release();
+        if (!user) {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
 
-        const user = users[0];
-
         // Verify password
-        const isPasswordValid = await bcryptjs.compare(password, user.password_hash);
+        const isPasswordValid = await bcryptjs.compare(password, user.passwordHash);
         if (!isPasswordValid) {
-            await connection.release();
             return res.status(401).json({ message: 'Invalid credentials' });
         }
 
         // Log login activity
-        await connection.execute(
-            `INSERT INTO activity_logs 
-             (user_id, activity_type, activity_description, created_at)
-             VALUES (?, ?, ?, NOW())`,
-            [user.id, 'LOGIN', `User ${user.user_id} logged in - ${user.email}`]
-        );
+        const activityLog = new ActivityLog({
+            userId: user._id,
+            activityType: 'LOGIN',
+            activityDescription: `User ${user.userId} logged in - ${user.email}`
+        });
+        await activityLog.save();
 
         console.log(`\n✅ User Login Successful:`);
-        console.log(`   User ID: ${user.user_id}`);
-        console.log(`   Name: ${user.first_name} ${user.last_name}`);
+        console.log(`   User ID: ${user.userId}`);
+        console.log(`   Name: ${user.firstName} ${user.lastName}`);
         console.log(`   Email: ${user.email}`);
-        console.log(`   Database ID: ${user.id}`);
+        console.log(`   MongoDB ID: ${user._id}`);
         console.log(`   Activity logged to database\n`);
-
-        await connection.release();
 
         // Generate JWT token
         const token = jwt.encode({
-            userId: user.id,
+            userId: user._id.toString(),
             email: user.email,
-            userName: user.user_id,
+            user_id: user.userId,
             exp: Math.floor(Date.now() / 1000) + JWT_EXPIRY
         }, JWT_SECRET);
 
         res.json({
             message: 'Login successful',
             token,
-            userId: user.user_id,
-            firstName: user.first_name,
-            lastName: user.last_name,
+            userId: user.userId,
+            firstName: user.firstName,
+            lastName: user.lastName,
             email: user.email,
             success: true
         });
@@ -321,7 +406,6 @@ router.post('/user-login', async (req, res) => {
 router.post('/admin-login', async (req, res) => {
     try {
         const { email, password } = req.body;
-        const pool = req.pool;
 
         // Predefined admin credentials
         const ADMIN_ACCOUNTS = [
@@ -346,19 +430,9 @@ router.post('/admin-login', async (req, res) => {
             return res.status(401).json({ message: 'Invalid admin credentials' });
         }
 
-        // Log admin activity
-        try {
-            const connection = await pool.getConnection();
-            await connection.execute(
-                `INSERT INTO admin_activity_logs 
-                 (admin_id, activity_type, activity_description, created_at)
-                 VALUES (?, ?, ?, NOW())`,
-                [admin.id, 'LOGIN', 'Admin login successful']
-            );
-            await connection.release();
-        } catch (logError) {
-            console.error('Error logging admin activity:', logError);
-        }
+        console.log(`\n✅ Admin Login Successful:`);
+        console.log(`   Admin: ${admin.name}`);
+        console.log(`   Email: ${admin.email}\n`);
 
         // Generate JWT token
         const token = jwt.encode({
@@ -381,14 +455,311 @@ router.post('/admin-login', async (req, res) => {
     }
 });
 
+// ===== LinkedIn OAuth =====
+router.get('/linkedin', (req, res) => {
+    if (!isLinkedInConfigured()) {
+        return res.status(501).json({ message: 'LinkedIn login is not configured.' });
+    }
+
+    const state = `nb_${Date.now()}`;
+    const scope = encodeURIComponent('openid profile email');
+    const redirectUri = encodeURIComponent(LINKEDIN_REDIRECT_URI);
+    const authUrl = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${LINKEDIN_CLIENT_ID}&redirect_uri=${redirectUri}&state=${state}&scope=${scope}`;
+    res.redirect(authUrl);
+});
+
+router.get('/linkedin/callback', async (req, res) => {
+    try {
+        if (!isLinkedInConfigured()) {
+            return res.status(501).json({ message: 'LinkedIn login is not configured.' });
+        }
+
+        const { code } = req.query;
+        if (!code) {
+            return res.status(400).json({ message: 'Authorization code missing.' });
+        }
+
+        const tokenResponse = await axios.post(
+            'https://www.linkedin.com/oauth/v2/accessToken',
+            new URLSearchParams({
+                grant_type: 'authorization_code',
+                code,
+                redirect_uri: LINKEDIN_REDIRECT_URI,
+                client_id: LINKEDIN_CLIENT_ID,
+                client_secret: LINKEDIN_CLIENT_SECRET
+            }),
+            { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+        );
+
+        const accessToken = tokenResponse.data.access_token;
+
+        const profileResponse = await axios.get('https://api.linkedin.com/v2/userinfo', {
+            headers: { Authorization: `Bearer ${accessToken}` }
+        });
+
+        const profile = profileResponse.data;
+        const email = profile.email;
+        const firstName = profile.given_name || 'LinkedIn';
+        const lastName = profile.family_name || 'User';
+
+        if (!email) {
+            return res.status(400).json({ message: 'Email not available from LinkedIn.' });
+        }
+
+        let user = await User.findOne({ email });
+
+        if (!user) {
+            const userId = await generateUniqueUserId(firstName);
+            const randomPassword = generateRandomPassword();
+            const hashedPassword = await bcryptjs.hash(randomPassword, 10);
+
+            user = new User({
+                firstName,
+                lastName,
+                email,
+                phone: `linkedin_${Date.now()}`,
+                userId,
+                passwordHash: hashedPassword,
+                dob: new Date('1990-01-01'),
+                emailVerified: true,
+                phoneVerified: false,
+                isActive: true
+            });
+
+            await user.save();
+            await sendCredentialsEmail(email, firstName, userId, randomPassword);
+        }
+
+        const token = jwt.encode({
+            userId: user._id.toString(),
+            email: user.email,
+            user_id: user.userId,
+            exp: Math.floor(Date.now() / 1000) + JWT_EXPIRY
+        }, JWT_SECRET);
+
+        res.send(`
+            <html>
+            <head><title>LinkedIn Login</title></head>
+            <body>
+                <script>
+                    localStorage.setItem('userToken', '${token}');
+                    localStorage.setItem('userId', '${user._id.toString()}');
+                    localStorage.setItem('user_id', '${user.userId}');
+                    localStorage.setItem('userName', '${user.firstName} ${user.lastName}');
+                    localStorage.setItem('userEmail', '${user.email}');
+                    window.location.href = '/dashboard.html?auth=user';
+                </script>
+            </body>
+            </html>
+        `);
+    } catch (error) {
+        console.error('LinkedIn login error:', error);
+        res.status(500).json({ message: 'LinkedIn login failed' });
+    }
+});
+
+// ===== Google OAuth =====
+router.get('/google', (req, res) => {
+    if (!isGoogleConfigured()) {
+        return res.status(501).json({ message: 'Google login is not configured.' });
+    }
+
+    const state = `nb_${Date.now()}`;
+    const scope = encodeURIComponent('openid profile email');
+    const redirectUri = encodeURIComponent(GOOGLE_REDIRECT_URI);
+    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${redirectUri}&state=${state}&scope=${scope}&access_type=offline`;
+    res.redirect(authUrl);
+});
+
+router.get('/google/callback', async (req, res) => {
+    try {
+        if (!isGoogleConfigured()) {
+            return res.status(501).json({ message: 'Google login is not configured.' });
+        }
+
+        const { code } = req.query;
+        if (!code) {
+            return res.status(400).json({ message: 'Authorization code missing.' });
+        }
+
+        const tokenResponse = await axios.post(
+            'https://oauth2.googleapis.com/token',
+            {
+                grant_type: 'authorization_code',
+                code,
+                redirect_uri: GOOGLE_REDIRECT_URI,
+                client_id: GOOGLE_CLIENT_ID,
+                client_secret: GOOGLE_CLIENT_SECRET
+            }
+        );
+
+        const accessToken = tokenResponse.data.access_token;
+
+        const profileResponse = await axios.get('https://www.googleapis.com/oauth2/v2/userinfo?access_token=' + accessToken);
+
+        const profile = profileResponse.data;
+        const email = profile.email;
+        const firstName = profile.given_name || 'Google';
+        const lastName = profile.family_name || 'User';
+
+        if (!email) {
+            return res.status(400).json({ message: 'Email not available from Google.' });
+        }
+
+        let user = await User.findOne({ email });
+
+        if (!user) {
+            const userId = await generateUniqueUserId(firstName);
+            const randomPassword = generateRandomPassword();
+            const hashedPassword = await bcryptjs.hash(randomPassword, 10);
+
+            user = new User({
+                firstName,
+                lastName,
+                email,
+                phone: `google_${Date.now()}`,
+                userId,
+                passwordHash: hashedPassword,
+                dob: new Date('1990-01-01'),
+                emailVerified: true,
+                phoneVerified: false,
+                isActive: true
+            });
+
+            await user.save();
+            await sendCredentialsEmail(email, firstName, userId, randomPassword);
+        }
+
+        const token = jwt.encode({
+            userId: user._id.toString(),
+            email: user.email,
+            user_id: user.userId,
+            exp: Math.floor(Date.now() / 1000) + JWT_EXPIRY
+        }, JWT_SECRET);
+
+        res.send(`
+            <html>
+            <head><title>Google Login</title></head>
+            <body>
+                <script>
+                    localStorage.setItem('userToken', '${token}');
+                    localStorage.setItem('userId', '${user._id.toString()}');
+                    localStorage.setItem('user_id', '${user.userId}');
+                    localStorage.setItem('userName', '${user.firstName} ${user.lastName}');
+                    localStorage.setItem('userEmail', '${user.email}');
+                    window.location.href = '/dashboard.html?auth=user';
+                </script>
+            </body>
+            </html>
+        `);
+    } catch (error) {
+        console.error('Google login error:', error);
+        res.status(500).json({ message: 'Google login failed' });
+    }
+});
+
+// ===== Facebook OAuth =====
+router.get('/facebook', (req, res) => {
+    if (!isFacebookConfigured()) {
+        return res.status(501).json({ message: 'Facebook login is not configured.' });
+    }
+
+    const state = `nb_${Date.now()}`;
+    const scope = encodeURIComponent('email public_profile');
+    const redirectUri = encodeURIComponent(FACEBOOK_REDIRECT_URI);
+    const authUrl = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${FACEBOOK_CLIENT_ID}&redirect_uri=${redirectUri}&state=${state}&scope=${scope}`;
+    res.redirect(authUrl);
+});
+
+router.get('/facebook/callback', async (req, res) => {
+    try {
+        if (!isFacebookConfigured()) {
+            return res.status(501).json({ message: 'Facebook login is not configured.' });
+        }
+
+        const { code } = req.query;
+        if (!code) {
+            return res.status(400).json({ message: 'Authorization code missing.' });
+        }
+
+        const tokenResponse = await axios.get('https://graph.facebook.com/v18.0/oauth/access_token', {
+            params: {
+                client_id: FACEBOOK_CLIENT_ID,
+                client_secret: FACEBOOK_CLIENT_SECRET,
+                redirect_uri: FACEBOOK_REDIRECT_URI,
+                code
+            }
+        });
+
+        const accessToken = tokenResponse.data.access_token;
+
+        const profileResponse = await axios.get('https://graph.facebook.com/me?fields=id,name,email,picture&access_token=' + accessToken);
+
+        const profile = profileResponse.data;
+        const email = profile.email;
+        const nameParts = profile.name ? profile.name.split(' ') : ['Facebook', 'User'];
+        const firstName = nameParts[0] || 'Facebook';
+        const lastName = nameParts.slice(1).join(' ') || 'User';
+
+        if (!email) {
+            return res.status(400).json({ message: 'Email not available from Facebook.' });
+        }
+
+        let user = await User.findOne({ email });
+
+        if (!user) {
+            const userId = await generateUniqueUserId(firstName);
+            const randomPassword = generateRandomPassword();
+            const hashedPassword = await bcryptjs.hash(randomPassword, 10);
+
+            user = new User({
+                firstName,
+                lastName,
+                email,
+                phone: `facebook_${Date.now()}`,
+                userId,
+                passwordHash: hashedPassword,
+                dob: new Date('1990-01-01'),
+                emailVerified: true,
+                phoneVerified: false,
+                isActive: true
+            });
+
+            await user.save();
+            await sendCredentialsEmail(email, firstName, userId, randomPassword);
+        }
+
+        const token = jwt.encode({
+            userId: user._id.toString(),
+            email: user.email,
+            user_id: user.userId,
+            exp: Math.floor(Date.now() / 1000) + JWT_EXPIRY
+        }, JWT_SECRET);
+
+        res.send(`
+            <html>
+            <head><title>Facebook Login</title></head>
+            <body>
+                <script>
+                    localStorage.setItem('userToken', '${token}');
+                    localStorage.setItem('userId', '${user._id.toString()}');
+                    localStorage.setItem('user_id', '${user.userId}');
+                    localStorage.setItem('userName', '${user.firstName} ${user.lastName}');
+                    localStorage.setItem('userEmail', '${user.email}');
+                    window.location.href = '/dashboard.html?auth=user';
+                </script>
+            </body>
+            </html>
+        `);
+    } catch (error) {
+        console.error('Facebook login error:', error);
+        res.status(500).json({ message: 'Facebook login failed' });
+    }
+});
+
 // ===== User Logout =====
 router.post('/logout', async (req, res) => {
     try {
-        const token = req.get('Authorization')?.split(' ')[1];
-        
-        // Token is invalidated on client side (localStorage removal)
-        // In production, you might want to maintain a token blacklist
-
         res.json({ message: 'Logout successful' });
     } catch (error) {
         console.error('Logout error:', error);
@@ -396,133 +767,10 @@ router.post('/logout', async (req, res) => {
     }
 });
 
-// ===== Helper Functions =====
-
-// Generate unique user ID
-async function generateUniqueUserId(firstName, pool) {
-    try {
-        // Format: FirstName_RandomCode_Timestamp
-        const code = Math.random().toString(36).substring(2, 7).toUpperCase();
-        const timestamp = Date.now().toString().slice(-4);
-        const baseUserId = `${firstName.substring(0, 3).toUpperCase()}_${code}_${timestamp}`;
-        
-        const connection = await pool.getConnection();
-        const [existing] = await connection.execute(
-            'SELECT user_id FROM users WHERE user_id LIKE ?',
-            [`${baseUserId}%`]
-        );
-        await connection.release();
-        
-        if (existing.length === 0) {
-            return baseUserId;
-        }
-        
-        // If exists, add a counter
-        for (let i = 1; i <= 100; i++) {
-            const uniqueId = `${baseUserId}${i}`;
-            const [exists] = await connection.execute(
-                'SELECT user_id FROM users WHERE user_id = ?',
-                [uniqueId]
-            );
-            if (exists.length === 0) {
-                return uniqueId;
-            }
-        }
-        return null;
-    } catch (error) {
-        console.error('Error generating unique user ID:', error);
-        return null;
-    }
-}
-
-// Generate random password
-function generateRandomPassword() {
-    const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    const lowercase = 'abcdefghijklmnopqrstuvwxyz';
-    const numbers = '0123456789';
-    const special = '!@#$%^&*';
-    
-    let password = '';
-    
-    // Add one of each type
-    password += uppercase[Math.floor(Math.random() * uppercase.length)];
-    password += lowercase[Math.floor(Math.random() * lowercase.length)];
-    password += numbers[Math.floor(Math.random() * numbers.length)];
-    password += special[Math.floor(Math.random() * special.length)];
-    
-    // Add 4 more random characters from all
-    const all = uppercase + lowercase + numbers + special;
-    for (let i = 0; i < 4; i++) {
-        password += all[Math.floor(Math.random() * all.length)];
-    }
-    
-    // Shuffle the password
-    return password.split('').sort(() => Math.random() - 0.5).join('');
-}
-
-// Send credentials email
-async function sendCredentialsEmail(email, firstName, userId, password) {
-    try {
-        const mailOptions = {
-            from: process.env.EMAIL_USER || 'noreply@nomadbihari.com',
-            to: email,
-            subject: 'नमस्ते! आपका NomadBihari खाता तैयार है 🎉',
-            html: `
-                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f5f5f5;">
-                    <div style="background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                        <h2 style="color: #2c3e50; text-align: center;">स्वागत है, ${firstName}! 👋</h2>
-                        
-                        <p style="color: #555; font-size: 16px; line-height: 1.6;">
-                            आपका <strong>NomadBihari</strong> खाता सफलतापूर्वक बनाया गया है। यहाँ आपके लॉगिन विवरण हैं:
-                        </p>
-                        
-                        <div style="background-color: #ecf0f1; padding: 20px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #3498db;">
-                            <p style="margin: 10px 0; color: #333;">
-                                <strong>📧 यूजर आईडी (User ID):</strong> <code style="background-color: white; padding: 5px 10px; border-radius: 3px;">${userId}</code>
-                            </p>
-                            <p style="margin: 10px 0; color: #333;">
-                                <strong>🔐 पासवर्ड (Password):</strong> <code style="background-color: white; padding: 5px 10px; border-radius: 3px;">${password}</code>
-                            </p>
-                        </div>
-                        
-                        <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #ffc107;">
-                            <p style="margin: 0; color: #856404;">
-                                <strong>⚠️ महत्वपूर्ण:</strong> इन विवरणों को सुरक्षित रखें। पहली लॉगिन के बाद अपना पासवर्ड बदलना सुनिश्चित करें।
-                            </p>
-                        </div>
-                        
-                        <div style="text-align: center; margin: 30px 0;">
-                            <a href="http://localhost:8000/frontend/pages/signin.html" style="background-color: #3498db; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
-                                🚀 अभी लॉगिन करें
-                            </a>
-                        </div>
-                        
-                        <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
-                        
-                        <p style="color: #888; font-size: 14px; text-align: center;">
-                            अगर आपको এই ईमेल में कोई समस्या दिख रही है, तो कृपया <strong>support@nomadbihari.com</strong> से संपर्क करें।
-                        </p>
-                    </div>
-                </div>
-            `
-        };
-        
-        await emailTransporter.sendMail(mailOptions);
-        console.log(`✅ Credentials email sent to ${email}`);
-        return true;
-    } catch (error) {
-        console.error('Error sending credentials email:', error);
-        // Log the error but don't fail the signup - user can still login
-        console.log(`⚠️ Email not sent to ${email} but account created successfully`);
-        return false;
-    }
-}
-
 // ===== Automatic Signup Endpoint =====
 router.post('/auto-signup', async (req, res) => {
     try {
         const { firstName, lastName, email, phone, dob } = req.body;
-        const pool = req.pool;
 
         // Validation
         if (!firstName || !lastName || !email || !phone || !dob) {
@@ -541,82 +789,96 @@ router.post('/auto-signup', async (req, res) => {
             return res.status(400).json({ message: 'कृपया एक वैध 10-अंकीय फोन नंबर दर्ज करें (Please enter a valid 10-digit phone number)' });
         }
 
-        const connection = await pool.getConnection();
+        // Check if user already exists
+        const existingUser = await User.findOne({
+            $or: [{ email }, { phone: phoneDigits }]
+        });
 
-        try {
-            // Check if user already exists
-            const [existingUser] = await connection.execute(
-                'SELECT id, user_id FROM users WHERE email = ? OR phone = ?',
-                [email, phoneDigits]
-            );
-
-            if (existingUser.length > 0) {
-                return res.status(400).json({ 
-                    message: 'इस ईमेल या फोन नंबर से खाता पहले से मौजूद है (User already exists with this email or phone)' 
-                });
-            }
-
-            // Generate unique user ID
-            const userId = await generateUniqueUserId(firstName, pool);
-            if (!userId) {
-                return res.status(500).json({ message: 'यूजर आईडी जेनरेट करने में विफल (Failed to generate user ID)' });
-            }
-
-            // Generate random password
-            const randomPassword = generateRandomPassword();
-            const hashedPassword = await bcryptjs.hash(randomPassword, 10);
-
-            console.log(`\n🔑 Auto-Generated Credentials for ${email}:`);
-            console.log(`   User ID: ${userId}`);
-            console.log(`   Password: ${randomPassword}`);
-            console.log(`   (Password will be sent via email)\n`);
-
-            // Insert user into database
-            const [result] = await connection.execute(
-                `INSERT INTO users (first_name, last_name, email, phone, user_id, password_hash, dob, email_verified, phone_verified, is_active)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                [firstName, lastName, email, phoneDigits, userId, hashedPassword, dob, false, false, true]
-            );
-
-            const newUserId = result.insertId;
-            console.log(`✅ User created in database with ID: ${newUserId}`);
-
-            // Log signup activity
-            await connection.execute(
-                `INSERT INTO activity_logs 
-                 (user_id, activity_type, activity_description, created_at)
-                 VALUES (?, ?, ?, NOW())`,
-                [newUserId, 'SIGNUP', `User ${userId} created account - ${email}`]
-            );
-            console.log(`📝 Activity logged for user ${userId}`);
-
-            // Send credentials via email
-            const emailSent = await sendCredentialsEmail(email, firstName, userId, randomPassword);
-
-            // Generate JWT token
-            const token = jwt.encode({
-                userId: newUserId,
-                email: email,
-                user_id: userId,
-                exp: Math.floor(Date.now() / 1000) + JWT_EXPIRY
-            }, JWT_SECRET);
-
-            res.json({
-                message: 'खाता सफलतापूर्वक बनाया गया (Account created successfully)',
-                success: true,
-                token,
-                userId: newUserId,
-                user_id: userId,
-                firstName: firstName,
-                lastName: lastName,
-                email: email,
-                emailSent: emailSent,
-                note: 'कृपया अपने ईमेल की जांच करें - आपकी लॉगिन आईडी और पासवर्ड ईमेल किए गए हैं (Check your email for login credentials)'
+        if (existingUser) {
+            return res.status(400).json({ 
+                message: 'इस ईमेल या फोन नंबर से खाता पहले से मौजूद है (User already exists with this email or phone)' 
             });
-
-        } finally {
-            await connection.release();
         }
+
+        // Require OTP verification
+        const emailOtpStatus = isOtpVerified(email);
+        if (!emailOtpStatus.ok) {
+            return res.status(400).json({ message: `Email OTP not verified: ${emailOtpStatus.message}` });
+        }
+
+        const phoneOtpStatus = isOtpVerified(phoneDigits);
+        if (!phoneOtpStatus.ok) {
+            return res.status(400).json({ message: `Phone OTP not verified: ${phoneOtpStatus.message}` });
+        }
+
+        // Generate unique user ID
+        const userId = await generateUniqueUserId(firstName);
+        if (!userId) {
+            return res.status(500).json({ message: 'यूजर आईडी जेनरेट करने में विफल (Failed to generate user ID)' });
+        }
+
+        // Generate random password
+        const randomPassword = generateRandomPassword();
+        const hashedPassword = await bcryptjs.hash(randomPassword, 10);
+
+        console.log(`\n🔑 Auto-Generated Credentials for ${email}:`);
+        console.log(`   User ID: ${userId}`);
+        console.log(`   Password: ${randomPassword}`);
+        console.log(`   (Password will be sent via email)\n`);
+
+        // Create user
+        const newUser = new User({
+            firstName,
+            lastName,
+            email,
+            phone: phoneDigits,
+            userId,
+            passwordHash: hashedPassword,
+            dob: new Date(dob),
+            emailVerified: false,
+            phoneVerified: false,
+            isActive: true
+        });
+
+        await newUser.save();
+        console.log(`✅ User created in MongoDB with ID: ${newUser._id}`);
+
+        // Log signup activity
+        const activityLog = new ActivityLog({
+            userId: newUser._id,
+            activityType: 'SIGNUP',
+            activityDescription: `User ${userId} created account - ${email}`
+        });
+        await activityLog.save();
+        console.log(`📝 Activity logged for user ${userId}`);
+
+        delete otpStorage[email];
+        delete otpStorage[phoneDigits];
+
+        // Send credentials via email
+        const emailSent = await sendCredentialsEmail(email, firstName, userId, randomPassword);
+
+        // Generate JWT token
+        const token = jwt.encode({
+            userId: newUser._id.toString(),
+            email: email,
+            user_id: userId,
+            exp: Math.floor(Date.now() / 1000) + JWT_EXPIRY
+        }, JWT_SECRET);
+
+        res.json({
+            message: 'खाता सफलतापूर्वक बनाया गया (Account created successfully)',
+            success: true,
+            token,
+            userId: newUser._id.toString(),
+            user_id: userId,
+            firstName: firstName,
+            lastName: lastName,
+            email: email,
+            emailSent: emailSent,
+            note: 'कृपया अपने ईमेल की जांच करें - आपकी लॉगिन आईडी और पासवर्ड ईमेल किए गए हैं (Check your email for login credentials)'
+        });
+
     } catch (error) {
         console.error('Auto-signup error:', error);
         res.status(500).json({ 

@@ -1,10 +1,25 @@
 /* ===== Sign Up JavaScript (Automatic Registration) ===== */
 
 // API Base URL - Fallback if main.js not loaded
-const API_BASE_URL = window.API_BASE_URL || 'http://localhost:5000/api';
+const API_BASE_URL = window.API_BASE_URL || 'http://127.0.0.1:3000/api';
+
+let emailOtpTarget = '';
+let phoneOtpTarget = '';
 
 document.addEventListener('DOMContentLoaded', function() {
     initializeSignupForm();
+
+    document.querySelectorAll('.social-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (this.classList.contains('google')) {
+                window.location.href = `${API_BASE_URL}/auth/google`;
+            } else if (this.classList.contains('facebook')) {
+                window.location.href = `${API_BASE_URL}/auth/facebook`;
+            } else if (this.classList.contains('linkedin')) {
+                window.location.href = `${API_BASE_URL}/auth/linkedin`;
+            }
+        });
+    });
 });
 
 function initializeSignupForm() {
@@ -12,6 +27,12 @@ function initializeSignupForm() {
     if (signupForm) {
         signupForm.addEventListener('submit', handleSignupSubmit);
     }
+
+    const sendEmailOtpBtn = document.getElementById('sendEmailOtp');
+    const sendPhoneOtpBtn = document.getElementById('sendPhoneOtp');
+
+    if (sendEmailOtpBtn) sendEmailOtpBtn.addEventListener('click', handleSendEmailOtp);
+    if (sendPhoneOtpBtn) sendPhoneOtpBtn.addEventListener('click', handleSendPhoneOtp);
 
     // Real-time validation
     const emailInput = document.getElementById('email');
@@ -21,6 +42,98 @@ function initializeSignupForm() {
     if (emailInput) emailInput.addEventListener('blur', validateEmailField);
     if (phoneInput) phoneInput.addEventListener('blur', validatePhoneField);
     if (dobInput) dobInput.addEventListener('blur', validateDobField);
+}
+
+function normalizePhoneTarget(rawPhone) {
+    const digits = rawPhone.replace(/\D/g, '');
+    if (digits.length === 10) {
+        return `+91${digits}`;
+    }
+    if (rawPhone.startsWith('+')) {
+        return rawPhone;
+    }
+    return digits;
+}
+
+function setOtpStatus(elementId, message, isError) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+    el.textContent = message;
+    el.style.color = isError ? '#e74c3c' : '#28a745';
+}
+
+async function handleSendEmailOtp() {
+    const email = document.getElementById('email').value.trim();
+    if (!email) {
+        setOtpStatus('emailOtpStatus', 'Please enter email first.', true);
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/auth/send-email-otp`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+        });
+        const data = await response.json();
+
+        if (response.ok) {
+            emailOtpTarget = email;
+            const demoText = data.demo_otp ? ` Demo OTP: ${data.demo_otp}` : '';
+            setOtpStatus('emailOtpStatus', `OTP sent to email.${demoText}`, false);
+        } else {
+            setOtpStatus('emailOtpStatus', data.message || 'Failed to send email OTP.', true);
+        }
+    } catch (error) {
+        console.error('Email OTP error:', error);
+        setOtpStatus('emailOtpStatus', 'Error sending email OTP.', true);
+    }
+}
+
+async function handleSendPhoneOtp() {
+    const phoneRaw = document.getElementById('phone').value.trim();
+    if (!phoneRaw) {
+        setOtpStatus('phoneOtpStatus', 'Please enter phone first.', true);
+        return;
+    }
+
+    const phoneTarget = normalizePhoneTarget(phoneRaw);
+    if (!phoneTarget || phoneTarget.replace(/\D/g, '').length < 10) {
+        setOtpStatus('phoneOtpStatus', 'Please enter a valid phone number.', true);
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/auth/send-phone-otp`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phone: phoneTarget })
+        });
+        const data = await response.json();
+
+        if (response.ok) {
+            phoneOtpTarget = phoneTarget;
+            const demoText = data.demo_otp ? ` Demo OTP: ${data.demo_otp}` : '';
+            setOtpStatus('phoneOtpStatus', `OTP sent to phone.${demoText}`, false);
+        } else {
+            setOtpStatus('phoneOtpStatus', data.message || 'Failed to send phone OTP.', true);
+        }
+    } catch (error) {
+        console.error('Phone OTP error:', error);
+        setOtpStatus('phoneOtpStatus', 'Error sending phone OTP.', true);
+    }
+}
+
+async function verifyOtp(type, target, otp) {
+    const endpoint = type === 'email' ? 'verify-email-otp' : 'verify-phone-otp';
+    const payload = type === 'email' ? { email: target, otp } : { phone: target, otp };
+    const response = await fetch(`${API_BASE_URL}/auth/${endpoint}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    });
+    const data = await response.json();
+    return { ok: response.ok, data };
 }
 
 // Validate email format
@@ -133,6 +246,37 @@ async function handleSignupSubmit(e) {
     
     if (age < 13) {
         showAuthMessage('आपकी आयु कम से कम 13 वर्ष होनी चाहिए (You must be at least 13 years old)', 'error');
+        return;
+    }
+
+    const emailOtp = document.getElementById('emailOtp').value.trim();
+    const phoneOtp = document.getElementById('phoneOtp').value.trim();
+
+    if (!emailOtp || !phoneOtp) {
+        showAuthMessage('कृपया Email और Phone OTP भरें (Please enter both OTPs)', 'error');
+        return;
+    }
+
+    if (!emailOtpTarget || emailOtpTarget !== email) {
+        showAuthMessage('Email OTP भेजें और वही email इस्तेमाल करें (Send OTP for this email)', 'error');
+        return;
+    }
+
+    const phoneTarget = phoneOtpTarget || normalizePhoneTarget(document.getElementById('phone').value.trim());
+    if (!phoneTarget) {
+        showAuthMessage('Phone OTP भेजें और वही phone इस्तेमाल करें (Send OTP for this phone)', 'error');
+        return;
+    }
+
+    const verifyEmail = await verifyOtp('email', emailOtpTarget, emailOtp);
+    if (!verifyEmail.ok) {
+        showAuthMessage(verifyEmail.data?.message || 'Email OTP verification failed', 'error');
+        return;
+    }
+
+    const verifyPhone = await verifyOtp('phone', phoneTarget, phoneOtp);
+    if (!verifyPhone.ok) {
+        showAuthMessage(verifyPhone.data?.message || 'Phone OTP verification failed', 'error');
         return;
     }
 

@@ -1,7 +1,9 @@
-/* ===== Posts Routes ===== */
+/* ===== Posts Routes with MongoDB ===== */
 
 const express = require('express');
 const router = express.Router();
+const Post = require('../models/Post');
+const User = require('../models/User');
 
 const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
@@ -16,17 +18,19 @@ router.post('/', authenticateToken, async (req, res) => {
     try {
         const { title, description, content, visibility, seoTitle, seoDescription } = req.body;
         const userId = req.user.userId;
-        const pool = req.pool;
-        const connection = await pool.getConnection();
 
-        await connection.execute(
-            `INSERT INTO posts (user_id, title, description, content, visibility, seo_title, seo_description)
-             VALUES (?, ?, ?, ?, ?, ?, ?)`,
-            [userId, title, description, content, visibility, seoTitle, seoDescription]
-        );
+        const post = new Post({
+            userId,
+            title,
+            description,
+            content,
+            visibility: visibility || 'public',
+            seoTitle,
+            seoDescription
+        });
 
-        await connection.release();
-        res.json({ message: 'Post created successfully' });
+        await post.save();
+        res.json({ message: 'Post created successfully', post });
     } catch (error) {
         console.error('Error creating post:', error);
         res.status(500).json({ message: 'Error creating post' });
@@ -36,24 +40,28 @@ router.post('/', authenticateToken, async (req, res) => {
 // ===== Get Feed =====
 router.get('/feed', authenticateToken, async (req, res) => {
     try {
-        const pool = req.pool;
-        const connection = await pool.getConnection();
+        const posts = await Post.find({ 
+            visibility: 'public',
+            isDeleted: false 
+        })
+        .sort({ createdAt: -1 })
+        .limit(50)
+        .populate('userId', 'firstName lastName userId');
 
-        const [posts] = await connection.execute(
-            `SELECT p.id, p.title, p.description, p.featured_image, p.created_at,
-                    u.first_name as authorName, u.user_id,
-                    (SELECT COUNT(*) FROM likes WHERE post_id = p.id) as likesCount,
-                    (SELECT COUNT(*) FROM comments WHERE post_id = p.id) as commentsCount,
-                    (SELECT COUNT(*) FROM shares WHERE post_id = p.id) as sharesCount
-             FROM posts p
-             JOIN users u ON p.user_id = u.id
-             WHERE p.visibility = 'public' AND p.is_deleted = FALSE
-             ORDER BY p.view_count DESC, p.created_at DESC
-             LIMIT 20`
-        );
+        const postsWithCounts = posts.map(post => ({
+            id: post._id,
+            title: post.title,
+            description: post.description,
+            featuredImage: post.featuredImage,
+            createdAt: post.createdAt,
+            authorName: post.userId ? `${post.userId.firstName} ${post.userId.lastName}` : 'Unknown',
+            userId: post.userId?.userId || 'unknown',
+            likesCount: post.likes.length,
+            commentsCount: post.comments.length,
+            sharesCount: 0
+        }));
 
-        await connection.release();
-        res.json(posts);
+        res.json(postsWithCounts);
     } catch (error) {
         console.error('Error fetching feed:', error);
         res.status(500).json({ message: 'Error fetching feed' });
@@ -65,34 +73,32 @@ router.post('/:postId/like', authenticateToken, async (req, res) => {
     try {
         const { postId } = req.params;
         const userId = req.user.userId;
-        const pool = req.pool;
-        const connection = await pool.getConnection();
 
-        // Check if already liked
-        const [existingLike] = await connection.execute(
-            'SELECT * FROM likes WHERE post_id = ? AND user_id = ?',
-            [postId, userId]
-        );
-
-        if (existingLike.length > 0) {
-            // Unlike
-            await connection.execute(
-                'DELETE FROM likes WHERE post_id = ? AND user_id = ?',
-                [postId, userId]
-            );
-        } else {
-            // Like
-            await connection.execute(
-                'INSERT INTO likes (post_id, user_id) VALUES (?, ?)',
-                [postId, userId]
-            );
+        const post = await Post.findById(postId);
+        
+        if (!post) {
+            return res.status(404).json({ message: 'Post not found' });
         }
 
-        await connection.release();
-        res.json({ message: 'Like operation successful' });
+        const likeIndex = post.likes.indexOf(userId);
+        
+        if (likeIndex > -1) {
+            // Unlike
+            post.likes.splice(likeIndex, 1);
+        } else {
+            // Like
+            post.likes.push(userId);
+        }
+
+        await post.save();
+
+        res.json({ 
+            message: likeIndex > -1 ? 'Post unliked' : 'Post liked',
+            likesCount: post.likes.length
+        });
     } catch (error) {
-        console.error('Error toggling like:', error);
-        res.status(500).json({ message: 'Error toggling like' });
+        console.error('Error liking post:', error);
+        res.status(500).json({ message: 'Error liking post' });
     }
 });
 
@@ -100,20 +106,15 @@ router.post('/:postId/like', authenticateToken, async (req, res) => {
 router.get('/:postId/comments', async (req, res) => {
     try {
         const { postId } = req.params;
-        const pool = req.pool;
-        const connection = await pool.getConnection();
 
-        const [comments] = await connection.execute(
-            `SELECT c.id, c.comment_text, c.created_at, u.first_name as authorName
-             FROM comments c
-             JOIN users u ON c.user_id = u.id
-             WHERE c.post_id = ? AND c.is_deleted = FALSE
-             ORDER BY c.created_at DESC`,
-            [postId]
-        );
+        const post = await Post.findById(postId)
+            .populate('comments.userId', 'firstName lastName userId');
 
-        await connection.release();
-        res.json(comments);
+        if (!post) {
+            return res.status(404).json({ message: 'Post not found' });
+        }
+
+        res.json(post.comments);
     } catch (error) {
         console.error('Error fetching comments:', error);
         res.status(500).json({ message: 'Error fetching comments' });
@@ -124,18 +125,27 @@ router.get('/:postId/comments', async (req, res) => {
 router.post('/:postId/comments', authenticateToken, async (req, res) => {
     try {
         const { postId } = req.params;
-        const { text } = req.body;
+        const { commentText } = req.body;
         const userId = req.user.userId;
-        const pool = req.pool;
-        const connection = await pool.getConnection();
 
-        await connection.execute(
-            'INSERT INTO comments (post_id, user_id, comment_text) VALUES (?, ?, ?)',
-            [postId, userId, text]
-        );
+        const post = await Post.findById(postId);
+        
+        if (!post) {
+            return res.status(404).json({ message: 'Post not found' });
+        }
 
-        await connection.release();
-        res.json({ message: 'Comment added successfully' });
+        post.comments.push({
+            userId,
+            commentText,
+            createdAt: new Date()
+        });
+
+        await post.save();
+
+        res.json({ 
+            message: 'Comment added successfully',
+            commentsCount: post.comments.length
+        });
     } catch (error) {
         console.error('Error adding comment:', error);
         res.status(500).json({ message: 'Error adding comment' });

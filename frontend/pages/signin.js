@@ -1,7 +1,7 @@
 /* ===== Sign In JavaScript ===== */
 
 // API Base URL - Fallback if main.js not loaded
-const API_BASE_URL = window.API_BASE_URL || 'http://localhost:5000/api';
+const API_BASE_URL = window.API_BASE_URL || 'http://127.0.0.1:3000/api';
 
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize tab switching

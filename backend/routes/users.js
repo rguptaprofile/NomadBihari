@@ -1,7 +1,9 @@
-/* ===== Users Routes ===== */
+/* ===== Users Routes with MongoDB ===== */
 
 const express = require('express');
 const router = express.Router();
+const User = require('../models/User');
+const Post = require('../models/Post');
 
 // Middleware to verify JWT token
 const authenticateToken = (req, res, next) => {
@@ -25,21 +27,14 @@ const authenticateToken = (req, res, next) => {
 router.get('/:userId', authenticateToken, async (req, res) => {
     try {
         const { userId } = req.params;
-        const pool = req.pool;
-        const connection = await pool.getConnection();
 
-        const [users] = await connection.execute(
-            'SELECT id, first_name, last_name, email, phone, user_id, dob, bio, profile_image, created_at FROM users WHERE id = ?',
-            [userId]
-        );
+        const user = await User.findById(userId).select('-passwordHash');
 
-        await connection.release();
-
-        if (users.length === 0) {
+        if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        res.json(users[0]);
+        res.json(user);
     } catch (error) {
         console.error('Error fetching user:', error);
         res.status(500).json({ message: 'Error fetching user' });
@@ -51,16 +46,18 @@ router.put('/:userId', authenticateToken, async (req, res) => {
     try {
         const { userId } = req.params;
         const { firstName, lastName, bio } = req.body;
-        const pool = req.pool;
-        const connection = await pool.getConnection();
 
-        await connection.execute(
-            'UPDATE users SET first_name = ?, last_name = ?, bio = ? WHERE id = ?',
-            [firstName, lastName, bio, userId]
-        );
+        const user = await User.findByIdAndUpdate(
+            userId,
+            { firstName, lastName, bio },
+            { new: true }
+        ).select('-passwordHash');
 
-        await connection.release();
-        res.json({ message: 'Profile updated successfully' });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.json({ message: 'Profile updated successfully', user });
     } catch (error) {
         console.error('Error updating profile:', error);
         res.status(500).json({ message: 'Error updating profile' });
@@ -71,11 +68,8 @@ router.put('/:userId', authenticateToken, async (req, res) => {
 router.delete('/:userId', authenticateToken, async (req, res) => {
     try {
         const { userId } = req.params;
-        const pool = req.pool;
-        const connection = await pool.getConnection();
 
-        await connection.execute('DELETE FROM users WHERE id = ?', [userId]);
-        await connection.release();
+        await User.findByIdAndDelete(userId);
 
         res.json({ message: 'Account deleted successfully' });
     } catch (error) {
@@ -88,22 +82,24 @@ router.delete('/:userId', authenticateToken, async (req, res) => {
 router.get('/:userId/posts', async (req, res) => {
     try {
         const { userId } = req.params;
-        const pool = req.pool;
-        const connection = await pool.getConnection();
 
-        const [posts] = await connection.execute(
-            `SELECT id, title, description, content, visibility, featured_image, view_count,
-                    created_at, (SELECT COUNT(*) FROM likes WHERE post_id = posts.id) as likesCount,
-                    (SELECT COUNT(*) FROM comments WHERE post_id = posts.id) as commentsCount,
-                    (SELECT COUNT(*) FROM shares WHERE post_id = posts.id) as sharesCount
-             FROM posts WHERE user_id = ? AND is_deleted = FALSE ORDER BY created_at DESC`,
-            [userId]
-        );
+        const posts = await Post.find({ 
+            userId: userId,
+            isDeleted: false 
+        })
+        .sort({ createdAt: -1 })
+        .populate('userId', 'firstName lastName');
 
-        await connection.release();
-        res.json(posts);
+        // Add counts
+        const postsWithCounts = posts.map(post => ({
+            ...post.toObject(),
+            likesCount: post.likes.length,
+            commentsCount: post.comments.length
+        }));
+
+        res.json(postsWithCounts);
     } catch (error) {
-        console.error('Error fetching posts:', error);
+        console.error('Error fetching user posts:', error);
         res.status(500).json({ message: 'Error fetching posts' });
     }
 });
@@ -112,22 +108,24 @@ router.get('/:userId/posts', async (req, res) => {
 router.get('/:userId/analytics', authenticateToken, async (req, res) => {
     try {
         const { userId } = req.params;
-        const pool = req.pool;
-        const connection = await pool.getConnection();
 
-        const [stats] = await connection.execute(
-            `SELECT 
-                (SELECT COUNT(*) FROM posts WHERE user_id = ?) as totalPosts,
-                (SELECT COALESCE(SUM(view_count), 0) FROM posts WHERE user_id = ?) as totalViews,
-                (SELECT COUNT(*) FROM likes WHERE post_id IN (SELECT id FROM posts WHERE user_id = ?)) as totalLikes,
-                (SELECT COUNT(*) FROM comments WHERE post_id IN (SELECT id FROM posts WHERE user_id = ?)) as totalComments,
-                (SELECT COUNT(*) FROM shares WHERE post_id IN (SELECT id FROM posts WHERE user_id = ?)) as totalShares,
-                (SELECT COUNT(*) FROM push_notification_subscriptions WHERE user_id = ?) as subscribersCount`,
-            [userId, userId, userId, userId, userId, userId]
-        );
+        const totalPosts = await Post.countDocuments({ userId, isDeleted: false });
+        const totalViews = await Post.aggregate([
+            { $match: { userId: userId, isDeleted: false } },
+            { $group: { _id: null, total: { $sum: '$viewCount' } } }
+        ]);
 
-        await connection.release();
-        res.json(stats[0] || {});
+        const totalLikes = await Post.aggregate([
+            { $match: { userId: userId, isDeleted: false } },
+            { $project: { likesCount: { $size: '$likes' } } },
+            { $group: { _id: null, total: { $sum: '$likesCount' } } }
+        ]);
+
+        res.json({
+            totalPosts,
+            totalViews: totalViews[0]?.total || 0,
+            totalLikes: totalLikes[0]?.total || 0
+        });
     } catch (error) {
         console.error('Error fetching analytics:', error);
         res.status(500).json({ message: 'Error fetching analytics' });

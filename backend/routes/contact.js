@@ -1,53 +1,94 @@
-/* ===== Contact Routes ===== */
+/* ===== Contact Routes with MongoDB ===== */
 
 const express = require('express');
 const router = express.Router();
-const nodemailer = require('nodemailer');
-
-const emailTransporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.EMAIL_USER || 'your-email@gmail.com',
-        pass: process.env.EMAIL_PASS || 'your-password'
-    }
-});
+const ContactQuery = require('../models/ContactQuery');
 
 // ===== Submit Contact Form =====
 router.post('/submit', async (req, res) => {
     try {
         const { name, email, phone, subject, message } = req.body;
-        const pool = req.pool;
-        const connection = await pool.getConnection();
 
-        // Save to database
-        await connection.execute(
-            `INSERT INTO contact_queries (name, email, phone, subject, message, status)
-             VALUES (?, ?, ?, ?, ?, 'new')`,
-            [name, email, phone, subject, message]
-        );
+        // Validation
+        if (!name || !email || !subject || !message) {
+            return res.status(400).json({ message: 'All required fields must be filled' });
+        }
 
-        await connection.release();
-
-        // Send notification email to admin
-        await emailTransporter.sendMail({
-            from: process.env.EMAIL_USER,
-            to: process.env.ADMIN_EMAIL || 'admin@nomadbihari.com',
-            subject: `New Contact Query: ${subject}`,
-            html: `
-                <h2>New Contact Query</h2>
-                <p><strong>Name:</strong> ${name}</p>
-                <p><strong>Email:</strong> ${email}</p>
-                <p><strong>Phone:</strong> ${phone || 'Not provided'}</p>
-                <p><strong>Subject:</strong> ${subject}</p>
-                <p><strong>Message:</strong></p>
-                <p>${message}</p>
-            `
+        // Create contact query
+        const contactQuery = new ContactQuery({
+            name,
+            email,
+            phone: phone || '',
+            subject,
+            message,
+            status: 'new'
         });
 
-        res.json({ message: 'Your message has been sent successfully' });
+        await contactQuery.save();
+
+        console.log(`\n📩 New Contact Query Received:`);
+        console.log(`   Name: ${name}`);
+        console.log(`   Email: ${email}`);
+        console.log(`   Subject: ${subject}\n`);
+
+        res.json({
+            message: 'Your message has been sent successfully. We will get back to you soon!',
+            success: true
+        });
     } catch (error) {
         console.error('Error submitting contact form:', error);
-        res.status(500).json({ message: 'Error submitting message' });
+        res.status(500).json({ message: 'Error sending message' });
+    }
+});
+
+// ===== Get All Contact Queries (Admin) =====
+router.get('/queries', async (req, res) => {
+    try {
+        const { status } = req.query;
+
+        let filter = {};
+        if (status) {
+            filter.status = status;
+        }
+
+        const queries = await ContactQuery.find(filter)
+            .sort({ createdAt: -1 })
+            .limit(100);
+
+        res.json(queries);
+    } catch (error) {
+        console.error('Error fetching contact queries:', error);
+        res.status(500).json({ message: 'Error fetching queries' });
+    }
+});
+
+// ===== Update Query Status (Admin) =====
+router.put('/queries/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status, replyMessage } = req.body;
+
+        const updateData = { status };
+        
+        if (replyMessage) {
+            updateData.replyMessage = replyMessage;
+            updateData.repliedAt = new Date();
+        }
+
+        const query = await ContactQuery.findByIdAndUpdate(
+            id,
+            updateData,
+            { new: true }
+        );
+
+        if (!query) {
+            return res.status(404).json({ message: 'Query not found' });
+        }
+
+        res.json({ message: 'Query updated successfully', query });
+    } catch (error) {
+        console.error('Error updating query:', error);
+        res.status(500).json({ message: 'Error updating query' });
     }
 });
 

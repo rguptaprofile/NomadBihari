@@ -6,11 +6,11 @@
     <title>Sign Up - Nomad Bihari</title>
     
     <!-- Favicon -->
-    <link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon-16x16.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="64x64" href="../assets/favicon-64x64.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="../assets/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="128x128" href="../assets/favicon-128x128.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/frontend/assets/logo+icon nomadbihari.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/frontend/assets/logo+icon nomadbihari.png">
+    <link rel="icon" type="image/png" sizes="64x64" href="/frontend/assets/logo+icon nomadbihari.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/frontend/assets/logo+icon nomadbihari.png">
+    <link rel="icon" type="image/png" sizes="128x128" href="/frontend/assets/logo+icon nomadbihari.png">
     
     <!-- Manifest -->
     <link rel="manifest" href="../manifest.json">
@@ -61,7 +61,7 @@
         <div class="navbar-container">
             <!-- Logo -->
             <div class="navbar-logo">
-                <img src="../assets/logo+icon nomadbihari.png" alt="Nomad Bihari" class="logo">
+                <img src="/frontend/assets/logo+icon nomadbihari.png" alt="Nomad Bihari" class="logo">
                 <span class="logo-text">
                     <span>N</span><span>O</span><span>M</span><span>A</span><span>D</span><span class="logo-space">&nbsp;</span><span>B</span><span>I</span><span>H</span><span>A</span><span>R</span><span>I</span>
                 </span>
@@ -90,7 +90,7 @@
         <div class="auth-container">
             <!-- Left Side - Info Panel -->
             <div class="auth-info-panel">
-                <img src="../assets/logo+icon nomadbihari.png" alt="Nomad Bihari Logo" class="auth-logo">
+                <img src="/frontend/assets/logo+icon nomadbihari.png" alt="Nomad Bihari Logo" class="auth-logo">
                 <h1>Welcome to<br>Nomad Bihari</h1>
                 <p>Join us to explore the rich culture, heritage, and hidden gems of Bihar. Create your account and start your journey today!</p>
                 
@@ -164,6 +164,29 @@
                         </div>
                     </div>
 
+                    <!-- OTPs -->
+                    <div class="form-columns">
+                        <div class="modern-form-group">
+                            <label for="emailOtp">Email OTP *</label>
+                            <div class="modern-input-wrapper">
+                                <i class="fas fa-envelope-open-text modern-input-icon"></i>
+                                <input type="text" id="emailOtp" name="emailOtp" placeholder="Enter email OTP">
+                                <button type="button" id="sendEmailOtp" class="modern-btn modern-btn-secondary" style="margin-left: 10px;">Send OTP</button>
+                            </div>
+                            <small id="emailOtpStatus"></small>
+                        </div>
+
+                        <div class="modern-form-group">
+                            <label for="phoneOtp">Phone OTP *</label>
+                            <div class="modern-input-wrapper">
+                                <i class="fas fa-sms modern-input-icon"></i>
+                                <input type="text" id="phoneOtp" name="phoneOtp" placeholder="Enter phone OTP">
+                                <button type="button" id="sendPhoneOtp" class="modern-btn modern-btn-secondary" style="margin-left: 10px;">Send OTP</button>
+                            </div>
+                            <small id="phoneOtpStatus"></small>
+                        </div>
+                    </div>
+
                     <!-- Date of Birth -->
                     <div class="modern-form-group">
                         <label for="dob">Date of Birth *</label>
@@ -197,8 +220,8 @@
                         <button type="button" class="social-btn facebook" title="Sign up with Facebook">
                             <i class="fab fa-facebook-f"></i>
                         </button>
-                        <button type="button" class="social-btn twitter" title="Sign up with Twitter">
-                            <i class="fab fa-twitter"></i>
+                        <button type="button" class="social-btn linkedin" title="Sign up with LinkedIn">
+                            <i class="fab fa-linkedin-in"></i>
                         </button>
                     </div>
                 </form>
