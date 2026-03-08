@@ -3,31 +3,40 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const mysql = require('mysql2/promise');
+const mongoose = require('mongoose');
 const path = require('path');
 
 const app = express();
 
 // ===== Middleware =====
-app.use(cors());
+app.use(cors({
+    origin: process.env.FRONTEND_URL || '*',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ===== MySQL Connection Pool =====
-const pool = mysql.createPool({
-    host: process.env.DB_HOST || 'localhost',
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || 'password',
-    database: process.env.DB_NAME || 'nomad_bihari',
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
+// ===== MongoDB Connection =====
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/nomad_bihari';
+
+mongoose.connect(MONGODB_URI)
+.then(() => {
+    console.log('✅ MongoDB Connected Successfully');
+    console.log(`📚 Database: ${mongoose.connection.name}`);
+})
+.catch(err => {
+    console.error('❌ MongoDB Connection Error:', err);
+    process.exit(1);
 });
 
-// ===== Store pool for use in routes =====
-app.use((req, res, next) => {
-    req.pool = pool;
-    next();
+// ===== Serve Static Frontend Files =====
+app.use(express.static(path.join(__dirname, '../frontend')));
+
+// ===== Serve index.html for root path =====
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
 
 // ===== Health Check =====
